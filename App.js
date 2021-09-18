@@ -1,4 +1,6 @@
 /*
+  !!! https://docs.amplify.aws/start (React Native & Expo)
+
   When you initialize a new Amplify project, a few things happen:
 
   It creates a top level directory called amplify that stores your backend definition. During the tutorial you'll add capabilities such as a GraphQL API 
@@ -15,29 +17,33 @@
   clone, pull, and delete backend resources.
 */
 
-
-import Amplify from 'aws-amplify'
-import config from './src/aws-exports'
-Amplify.configure(config)
+// import { withAuthenticator } from 'aws-amplify-react-native';
+import { TextInput, Button, Stylesheet, Text, View } from 'react-native';
+import Amplify from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react-native'
+import awsmobile from './aws-exports';
+Amplify.configure(awsmobile);
 
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
 
-export default function App() {
+function App() {
   return (
-    <View style={styles.container}>
+    <View>
       <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" />
     </View>
-  );
+  )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default withAuthenticator(App)
+
+/// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#fff',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+// });
+
