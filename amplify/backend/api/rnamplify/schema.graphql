@@ -11,8 +11,8 @@
 	operations, and the GraphQL resolvers needed to make everything work together.
 """
 
-type Todo @model {
+type Book @model {
   id: ID!
-  name: String!
-  description: String
+  title: String!
+  author: String
 }

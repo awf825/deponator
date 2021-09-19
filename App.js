@@ -18,32 +18,122 @@
 */
 
 // import { withAuthenticator } from 'aws-amplify-react-native';
-import { TextInput, Button, Stylesheet, Text, View } from 'react-native';
+import { TextInput, Button, StyleSheet, Text, View } from 'react-native';
 import Amplify from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react-native'
 import awsmobile from './aws-exports';
 Amplify.configure(awsmobile);
 
+import { API, graphqlOperation } from '@aws-amplify/api';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 
-function App() {
-  return (
-    <View>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  )
+const AddBook = `    
+mutation ($title: String! $author: String) {
+  createBook(input: {
+    title: $title
+    author: $author
+  }) {
+    id title author
+  }
+}
+`;
+
+const ListBooks = `
+query {
+  listBooks {
+    items {
+      id title author 
+    }
+  }
+}
+`;
+
+class App extends React.Component {
+  state = {
+    title: '',
+    author: '',
+    books: []
+  }
+
+  async componentDidMount() {
+    try {
+      const books = await API.graphql(graphqlOperation(ListBooks));
+      console.log('books: ', books)
+      this.setState({ books: books.data.listBooks.items });
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  onChangeText = (key, val) => {
+    this.setState({ [key]: val })
+  }
+
+  addBook = async () => {
+    if (this.state.title === '' || this.state.author === '') return;
+    const book = { title: this.state.title, author: this.state.author };
+    try {
+      const books = [...this.state.books, book];
+      this.setState({ books, title: '', author: '' })
+      await API.graphql(graphqlOperation(AddBook, book));
+      console.log('addbook success');
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          value={this.state.title}
+          onChangeText={val => this.onChangeText('title', val)}
+          placeholder="What do you want to read?"
+        />
+        <TextInput
+          style={styles.input}
+          value={this.state.author}
+          onChangeText={val => this.onChangeText('author', val)}
+          placeholder="Who wrote it?"
+        />
+        <Button onPress={this.addBook} title="Add to TBR" color="#eeaa55" />
+        {
+          this.state.books.map((book, index) => {
+            return ( 
+              <View key={index} style={styles.book}>
+                <Text style={styles.title}>{book.title}</Text>
+                <Text style={styles.author}>{book.author}</Text>
+              </View>
+            )
+          })
+        }
+      </View>
+    );
+  }
 }
 
-export default withAuthenticator(App)
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingTop: 50
+  },
+  input: {
+    height: 50,
+    borderBottomWidth: 2,
+    borderBottomColor: 'blue',
+    marginVertical: 10
+  },
+  book: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 10
+  },
+  title: { fontSize: 16 },
+  author: { color: 'rgba(0, 0, 0, .5)' }
+});
 
-/// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
-
+export default withAuthenticator(App);
