@@ -27,27 +27,9 @@ Amplify.configure(awsmobile);
 import { API, graphqlOperation } from '@aws-amplify/api';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
+import { ListBooks, AddBook } from './src/components/graphql.js';
+import ResourceGrid from './src/components/ResourceGrid.js' 
 
-const AddBook = `    
-mutation ($title: String! $author: String) {
-  createBook(input: {
-    title: $title
-    author: $author
-  }) {
-    id title author
-  }
-}
-`;
-
-const ListBooks = `
-query {
-  listBooks {
-    items {
-      id title author 
-    }
-  }
-}
-`;
 
 class App extends React.Component {
   state = {
@@ -77,7 +59,6 @@ class App extends React.Component {
       const books = [...this.state.books, book];
       this.setState({ books, title: '', author: '' })
       await API.graphql(graphqlOperation(AddBook, book));
-      console.log('addbook success');
     } catch (err) {
       console.log(err)
     }
@@ -85,30 +66,8 @@ class App extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          value={this.state.title}
-          onChangeText={val => this.onChangeText('title', val)}
-          placeholder="What do you want to read?"
-        />
-        <TextInput
-          style={styles.input}
-          value={this.state.author}
-          onChangeText={val => this.onChangeText('author', val)}
-          placeholder="Who wrote it?"
-        />
-        <Button onPress={this.addBook} title="Add to TBR" color="#eeaa55" />
-        {
-          this.state.books.map((book, index) => {
-            return ( 
-              <View key={index} style={styles.book}>
-                <Text style={styles.title}>{book.title}</Text>
-                <Text style={styles.author}>{book.author}</Text>
-              </View>
-            )
-          })
-        }
+      <View>
+        <ResourceGrid books={this.state.books} />
       </View>
     );
   }
@@ -137,3 +96,29 @@ const styles = StyleSheet.create({
 });
 
 export default withAuthenticator(App);
+
+      /// <View style={styles.container}>
+      //   <TextInput
+      //     style={styles.input}
+      //     value={this.state.title}
+      //     onChangeText={val => this.onChangeText('title', val)}
+      //     placeholder="What do you want to read?"
+      //   />
+      //   <TextInput
+      //     style={styles.input}
+      //     value={this.state.author}
+      //     onChangeText={val => this.onChangeText('author', val)}
+      //     placeholder="Who wrote it?"
+      //   />
+      //   <Button onPress={this.addBook} title="Add to TBR" color="#eeaa55" />
+      //   {
+      //     this.state.books.map((book, index) => {
+      //       return ( 
+      //         <View key={index} style={styles.book}>
+      //           <Text style={styles.title}>{book.title}</Text>
+      //           <Text style={styles.author}>{book.author}</Text>
+      //         </View>
+      //       )
+      //     })
+      //   }
+      // </View>*/}
