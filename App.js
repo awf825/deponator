@@ -28,14 +28,15 @@ import { API, graphqlOperation } from '@aws-amplify/api';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { ListBooks, AddBook } from './src/components/graphql.js';
-import ResourceGrid from './src/components/ResourceGrid.js' 
+import ResourceGrid from './src/components/ResourceGrid.js';
+import { Tab } from 'react-native-elements';
+import AddBooks from './src/components/AddBook.js';
 
 
 class App extends React.Component {
   state = {
-    title: '',
-    author: '',
-    books: []
+    books: [],
+    tabIndex: 0
   }
 
   async componentDidMount() {
@@ -48,26 +49,36 @@ class App extends React.Component {
     }
   }
 
-  onChangeText = (key, val) => {
-    this.setState({ [key]: val })
+  setIndex = (idx) => {
+    // event simply sends back index of tab
+    this.setState({ ...this.state, tabIndex: idx})
   }
 
-  addBook = async () => {
-    if (this.state.title === '' || this.state.author === '') return;
-    const book = { title: this.state.title, author: this.state.author };
-    try {
-      const books = [...this.state.books, book];
-      this.setState({ books, title: '', author: '' })
-      await API.graphql(graphqlOperation(AddBook, book));
-    } catch (err) {
-      console.log(err)
+  renderSwitch = (param) => {
+    switch(param) {
+      case 0:
+        return <ResourceGrid books={this.state.books}/>
+      case 1:
+        return <ResourceGrid books={{}}/>;
+      case 3: 
+        return <AddBooks />;
+      default:
+        return <ResourceGrid books={this.state.books}/>;
     }
   }
 
   render() {
     return (
-      <View>
-        <ResourceGrid books={this.state.books} />
+      <View style={styles.container}>
+        <Tab value={this.state.tabIndex} onChange={this.setIndex}>
+          <Tab.Item title="home" />
+          <Tab.Item title="depos" />
+          <Tab.Item title="poi" />
+          <Tab.Item title="addBook" />
+        </Tab>
+        {
+          this.renderSwitch(this.state.tabIndex)
+        }
       </View>
     );
   }
@@ -76,7 +87,7 @@ class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'black',
     paddingHorizontal: 10,
     paddingTop: 50
   },
@@ -96,29 +107,3 @@ const styles = StyleSheet.create({
 });
 
 export default withAuthenticator(App);
-
-      /// <View style={styles.container}>
-      //   <TextInput
-      //     style={styles.input}
-      //     value={this.state.title}
-      //     onChangeText={val => this.onChangeText('title', val)}
-      //     placeholder="What do you want to read?"
-      //   />
-      //   <TextInput
-      //     style={styles.input}
-      //     value={this.state.author}
-      //     onChangeText={val => this.onChangeText('author', val)}
-      //     placeholder="Who wrote it?"
-      //   />
-      //   <Button onPress={this.addBook} title="Add to TBR" color="#eeaa55" />
-      //   {
-      //     this.state.books.map((book, index) => {
-      //       return ( 
-      //         <View key={index} style={styles.book}>
-      //           <Text style={styles.title}>{book.title}</Text>
-      //           <Text style={styles.author}>{book.author}</Text>
-      //         </View>
-      //       )
-      //     })
-      //   }
-      // </View>*/}

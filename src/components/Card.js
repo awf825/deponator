@@ -5,9 +5,6 @@ const Card = (props) => {
 	return (
 		<View style={styles.card}>
 			<Text style={styles.title}>{props.title}</Text>
-            <Text style={styles.title}>{props.author}</Text>
-            <Text style={styles.title}>{props.title}</Text>
-            <Text style={styles.title}>{props.author}</Text>
 		</View>
 	)
 }
@@ -18,18 +15,19 @@ const styles = StyleSheet.create({
     
     card:{
         marginVertical:15,
-        width:'100%',
-        borderRadius:35,
         backgroundColor:'red',
+        height: '80%',
         textAlign: 'center'
     },
     title:{
         marginLeft:0,
+        marginTop: '5%',
         padding:0,
         width:'100%',
         height:'100%',
         borderRadius:30,
         position:'relative',
-        opacity:0.65
+        opacity:0.65,
+        textAlign: 'center'
     }
 })

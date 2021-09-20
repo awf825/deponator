@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList, Image } from 'react-native';
 import Card from './Card.js'
 
 const ResourceGrid = (props) => {
@@ -16,7 +16,7 @@ const ResourceGrid = (props) => {
 	}, []);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<ScrollView contentContainerStyle={styles.container}>
 			<FlatList
 				data={props.books}
 				renderItem={({item}) => (
@@ -33,15 +33,14 @@ const ResourceGrid = (props) => {
 				numColumns={3}
 				keyExtractor={(item, index) => index}
 			/>
-		</SafeAreaView>
+		</ScrollView>
 	)
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'white',
+	 flexGrow: 1,
+	 justifyContent: 'space-between'
   }
 });
 
