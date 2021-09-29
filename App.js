@@ -26,84 +26,80 @@ Amplify.configure(awsmobile);
 
 import { API, graphqlOperation } from '@aws-amplify/api';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ListBooks, AddBook } from './src/components/graphql.js';
 import ResourceGrid from './src/components/ResourceGrid.js';
 import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
 
 
-class App extends React.Component {
-  state = {
-    books: [],
-    tabIndex: 0
-  }
+function App() {
+  const [books, setBooks] = useState([]);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  async componentDidMount() {
-    try {
+  //TODO export from other file
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: 'black',
+      paddingHorizontal: 10,
+      paddingTop: 50
+    },
+    input: {
+      height: 50,
+      borderBottomWidth: 2,
+      borderBottomColor: 'blue',
+      marginVertical: 10
+    },
+    book: {
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+      paddingVertical: 10
+    },
+    title: { fontSize: 16 },
+    author: { color: 'rgba(0, 0, 0, .5)' }
+  });
+
+  useEffect(() => {
+    const getResult = async () => {
       const books = await API.graphql(graphqlOperation(ListBooks));
       console.log('books: ', books)
-      this.setState({ books: books.data.listBooks.items });
+      setBooks(books.data.listBooks.items);
+    };
+
+    try {
+      getResult();
     } catch(err) {
       console.log(err)
     }
-  }
+  }, [])
 
-  setIndex = (idx) => {
-    // event simply sends back index of tab
-    this.setState({ ...this.state, tabIndex: idx})
-  }
-
-  renderSwitch = (param) => {
+  const renderSwitch = (param) => {
     switch(param) {
       case 0:
-        return <ResourceGrid books={this.state.books}/>
+        return <ResourceGrid books={books}/>
       case 1:
-        return <ResourceGrid books={{}}/>;
+        return <ResourceGrid books={[]}/>;
       case 3: 
         return <AddBooks />;
       default:
-        return <ResourceGrid books={this.state.books}/>;
+        return <ResourceGrid books={books}/>;
     }
   }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Tab value={this.state.tabIndex} onChange={this.setIndex}>
-          <Tab.Item title="home" />
-          <Tab.Item title="depos" />
-          <Tab.Item title="poi" />
-          <Tab.Item title="addBook" />
-        </Tab>
-        {
-          this.renderSwitch(this.state.tabIndex)
-        }
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <Tab value={tabIndex} onChange={val => setTabIndex(val)}>
+        <Tab.Item title="home" />
+        <Tab.Item title="depos" />
+        <Tab.Item title="poi" />
+        <Tab.Item title="addBook" />
+      </Tab>
+      {
+        renderSwitch(tabIndex)
+      }
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-    paddingHorizontal: 10,
-    paddingTop: 50
-  },
-  input: {
-    height: 50,
-    borderBottomWidth: 2,
-    borderBottomColor: 'blue',
-    marginVertical: 10
-  },
-  book: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: 10
-  },
-  title: { fontSize: 16 },
-  author: { color: 'rgba(0, 0, 0, .5)' }
-});
 
 export default withAuthenticator(App);
