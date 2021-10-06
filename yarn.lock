@@ -7103,6 +7103,11 @@
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz"
   "version" "17.0.2"
 
+"react-native-drag-drop-grid-library@^1.0.7":
+  "integrity" "sha512-P36v2HowRWK8kp9MOh/2lpBsZAsZB+VimEAUhq5o8/5x3wGlhdV378O+1oS5sOJruOje/WAUri5wWv5AaBLukQ=="
+  "resolved" "https://registry.npmjs.org/react-native-drag-drop-grid-library/-/react-native-drag-drop-grid-library-1.0.7.tgz"
+  "version" "1.0.7"
+
 "react-native-draganddrop-board@^1.0.4":
   "integrity" "sha512-DwcwR+2A5g92CfDsWnEgYiTvgU7QE+f1KApwWuF6mdTFSyoqjdWDMpXexkQxANDXmyHbAEO2pHllfK8FOKZ0dg=="
   "resolved" "https://registry.npmjs.org/react-native-draganddrop-board/-/react-native-draganddrop-board-1.0.4.tgz"

@@ -30,7 +30,8 @@ import React, { useState, useEffect } from 'react';
 import { ListBooks, AddBook } from './src/components/graphql.js';
 // import ResourceGrid from './src/components/ResourceGrid.js';
 // import Workboard from './src/components/Workboard.js';
-import Workgrid from './src/components/Workgrid.js';
+// import Workgrid from './src/components/Workgrid.js';
+import BubbleGrid from './src/components/BubbleGrid.js';
 import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
 
@@ -48,7 +49,7 @@ function App() {
       paddingTop: 50
     },
     input: {
-      height: 50,
+      // height: 50,
       borderBottomWidth: 2,
       borderBottomColor: 'blue',
       marginVertical: 10
@@ -76,21 +77,21 @@ function App() {
     }
   }, [])
 
-  const renderSwitch = (param) => {
-    switch(param) {
-      case 0:
-        return <ResourceGrid books={books}/>
-      case 1:
-        return <ResourceGrid books={[]}/>;
-      case 3: 
-        return <AddBooks />;
-      default:
-        return <ResourceGrid books={books}/>;
-    }
-          // {
-      //   renderSwitch(tabIndex)
-      // }
-  }
+  // const renderSwitch = (param) => {
+  //   switch(param) {
+  //     case 0:
+  //       return <ResourceGrid books={books}/>
+  //     case 1:
+  //       return <ResourceGrid books={[]}/>;
+  //     case 3: 
+  //       return <AddBooks />;
+  //     default:
+  //       return <ResourceGrid books={books}/>;
+  //   }
+  //         // {
+  //     //   renderSwitch(tabIndex)
+  //     // }
+  // }
 
   return (
     <View style={styles.container}>
@@ -100,7 +101,7 @@ function App() {
         <Tab.Item title="poi" />
         <Tab.Item title="addBook" />
       </Tab>
-      <Workgrid />
+      <BubbleGrid />
     </View>
   );
 }
