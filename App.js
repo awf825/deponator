@@ -29,7 +29,8 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import { ListBooks, AddBook } from './src/components/graphql.js';
 // import ResourceGrid from './src/components/ResourceGrid.js';
-import Workboard from './src/components/Workboard.js';
+// import Workboard from './src/components/Workboard.js';
+import Workgrid from './src/components/Workgrid.js';
 import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
 
@@ -99,7 +100,7 @@ function App() {
         <Tab.Item title="poi" />
         <Tab.Item title="addBook" />
       </Tab>
-      <Workboard />
+      <Workgrid />
     </View>
   );
 }
