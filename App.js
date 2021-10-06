@@ -28,7 +28,8 @@ import { API, graphqlOperation } from '@aws-amplify/api';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import { ListBooks, AddBook } from './src/components/graphql.js';
-import ResourceGrid from './src/components/ResourceGrid.js';
+// import ResourceGrid from './src/components/ResourceGrid.js';
+import Workboard from './src/components/Workboard.js';
 import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
 
@@ -85,6 +86,9 @@ function App() {
       default:
         return <ResourceGrid books={books}/>;
     }
+          // {
+      //   renderSwitch(tabIndex)
+      // }
   }
 
   return (
@@ -95,9 +99,7 @@ function App() {
         <Tab.Item title="poi" />
         <Tab.Item title="addBook" />
       </Tab>
-      {
-        renderSwitch(tabIndex)
-      }
+      <Workboard />
     </View>
   );
 }
