@@ -50,6 +50,7 @@ import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
 let CIRCLE_RADIUS = 36;
 let Window = Dimensions.get('window');
+console.log("Dimensions.get('window'): ", Window)
 let styles = StyleSheet.create({
     mainContainer: {
         flex    : 1
@@ -105,6 +106,9 @@ function App() {
   const [showDraggable, setShowDraggable] = useState(true);
   const [dropZoneValues, setDropZoneValues] = useState(null);
 
+  //const [gridZoneValues, setGridZoneValues] = useState(null);
+  const [boardView, setBoardView] = useState(null)
+
   useEffect(() => {
     const getResult = async () => {
       const books = await API.graphql(graphqlOperation(ListBooks));
@@ -118,30 +122,79 @@ function App() {
       console.log(err)
     }
   }, [])
+
   /*
-    useRef returns a mutable ref object whose .current property is initialized to the passed argument (initialValue). 
-    The returned object will persist for the full lifetime of the component. 
-    https://reactjs.org/docs/hooks-reference.html#useref
+    In second side effect, build the boardView based on the amount of books the user has saved.
 
-    1) Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
-    run the animations by setting these values to the style of the element to animate.
+    Initialize the height of the device window (static) as well as the width of what each block
+    will be (arbitrarily 3, but this can be based on a user setting or the window width itself).
+    Additionally, init 'tick' values for both the x and y axis.
 
-    2) Create the PanResponder, which is responsible for doing the dragging. We are setting the handlers when the user 
-    moves and releases the element.
-
-    3) The handler will trigger when the element is moving. We need to set the animated values to perform the dragging correctly.
-    
-    4) Write the code to execute when the element is released. For now it is empty, but soon we will animate the circle 
-    back to the center.
-
-    pan: 
-      The getLayout method returns the left and top properties with the correct values for each frame during the animation.
-
-      Use the Animated.spring method to run the animation. This method will run the animation at a constant speed and 
-      we can control the friction and tension. The first parameter accepts the animation values. The second parameter 
-      is a configuration object. Here, we are defining only the toValue, which is the origin coordinates. This 
-      will return the circle to the middle.
+    As the books are looped through, reconcile the tick values on each iteration. If i%3 is 
+    bouncing to 0, this means we should start a new row (dx = 0, dy + 1). In any other event, 
+    given that i > 0, dx should tick up. Use the tick values to calculate the (arbitrary) top
+    and (dynamic based on width) left sides of each square.    
   */
+
+  useEffect(() => {
+    console.log('books at second useEffect: ', books)
+    const w = Window.width / 3;
+    const h = Window.height;
+    let dx = 0;
+    let dy = 0; 
+    const newBoardView = books.map((b,i) => {
+                  if (i>0) {
+                    dx += 1
+                    if (i%3 === 0) {
+                      dx = 0
+                      dy += 1
+                    }
+                  }
+                  const calcTop = (0+(dy*100))
+                  const calcLeft = (0+(dx*w))
+                  const s = StyleSheet.create({
+                    gridSquare: {
+                      position: 'absolute',
+                      borderColor: '#000000',
+                      top: calcTop,
+                      left: calcLeft,
+                      width: w,
+                      height: 100,
+                      borderWidth: 1
+                    }
+                  });
+                  return (
+                    <View style={s.gridSquare} key={i+1}>
+                      {renderDraggable(i)}
+                    </View>
+                  )
+                });
+    setBoardView(newBoardView)
+  }, [books])
+
+
+    //// useRef returns a mutable ref object whose .current property is initialized to the passed argument (initialValue). 
+    // The returned object will persist for the full lifetime of the component. 
+    // https://reactjs.org/docs/hooks-reference.html#useref
+
+    // 1) Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
+    // run the animations by setting these values to the style of the element to animate.
+
+    // 2) Create the PanResponder, which is responsible for doing the dragging. We are setting the handlers when the user 
+    // moves and releases the element.
+
+    // 3) The handler will trigger when the element is moving. We need to set the animated values to perform the dragging correctly.
+    
+    // 4) Write the code to execute when the element is released. For now it is empty, but soon we will animate the circle 
+    // back to the center.
+
+    // pan: 
+    //   The getLayout method returns the left and top properties with the correct values for each frame during the animation.
+
+    //   Use the Animated.spring method to run the animation. This method will run the animation at a constant speed and 
+    //   we can control the friction and tension. The first parameter accepts the animation values. The second parameter 
+    //   is a configuration object. Here, we are defining only the toValue, which is the origin coordinates. This 
+    //   will return the circle to the middle.
 
   //I've gone ahead and set two panResponders. This actually works, BUT both orbs are bound to the same state. 
   // My grid will have a different state handling scheme:
@@ -160,7 +213,6 @@ function App() {
   //    the 4th row is OFF LIMITS.  
 
   const panOne = useRef(new Animated.ValueXY()).current
-  const panTwo = useRef(new Animated.ValueXY()).current
 
   const panResponderOne = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -181,48 +233,21 @@ function App() {
     }
   });
 
-  const panResponderTwo = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: Animated.event([null, {
-      dx: panTwo.x,
-      dy: panTwo.y
-    }], {}),
-    onPanResponderRelease: (e, gesture) => {
-      if (isDropZone(gesture)) {
-        console.log('GESTURE: ', gesture)
-        setShowDraggable(false)
-      } else {
-        Animated.spring(
-          panTwo,
-          {toValue:{x:0,y:0}}
-        ).start()
-      }
-    }
-  });
-
-  const renderDraggable = () => {
+  const renderDraggable = (idx) => {
     if (showDraggable) {
       return (
-          <View style={styles.draggableContainer}>
-              <Animated.View 
-                {...panResponderOne.panHandlers}
-                style={[panOne.getLayout(), styles.circle]}
-              >
-                <Text style={styles.text}>Drag me!</Text>
-              </Animated.View>
-              <Animated.View 
-                {...panResponderTwo.panHandlers}
-                style={[panTwo.getLayout(), styles.circle]}
-              >
-                <Text style={styles.text}>Drag me!</Text>
-              </Animated.View>
-          </View>
+          <Animated.View 
+            {...panResponderOne.panHandlers}
+            style={[panOne.getLayout(), styles.circle]}
+          >
+            <Text style={styles.text}>{idx}</Text>
+          </Animated.View>
       );
     }
   }
 
-  // // Next, we need to set the value of the dropZoneValues property dynamically 
-  // and we need to know the width and height (or x and y) from the drop zone 
+  ///// // Next, we need to set the value of the dropZoneValues property dynamically 
+  // Next, we need to set the value of the dropZoneValues property dynamically  and we need to know the width and height (or x and y) from the drop zone 
   // container. These values will change based on the device.
 
   // First, we first define a callback where we set the values for the property.
@@ -233,26 +258,29 @@ function App() {
 
 
   const isDropZone = (gesture) => {
-    var dz = dropZoneValues;
+    // var dz = dropZoneValues;
+    console.log('GESTURE: ', gesture)
     // It seems that dz.y is always set to 0. I don't know why this is. but 
     // first condition will always be true
     // BUT this seems to be working. dz.y + dz.height is always 100. 
     // As you move FUTHER DOWN THE SCREEN, gesture.moveY increases.
     // As you move FURTHER TO THE RIGHT, gesture.moveX increases.
-    return gesture.moveY > dz.y && gesture.moveY < dz.y + dz.height;
+
+    // return gesture.moveY > dz.y && gesture.moveY < dz.y + dz.height;
   }
+
+  const buildGridState = (evt) => {
+    console.log("evt.nativeEvent @ buildGridState = (evt) => { ", evt.nativeEvent)
+  } 
 
   return (
     <View 
       style={styles.mainContainer}
+      // onLayout={(evt) => setDropZoneValues(evt.nativeEvent.layout)}
+      onLayout = {(evt) => buildGridState(evt)}
+      // style={styles.dropZone}
     >
-      <View 
-        onLayout={(evt) => setDropZoneValues(evt.nativeEvent.layout)}
-        style={styles.dropZone}
-      >
-        <Text style={styles.text}>Drop me here!</Text>
-      </View>
-      {renderDraggable()}
+      {boardView}
     </View>
   );
 }
