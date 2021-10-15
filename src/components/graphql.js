@@ -2,9 +2,8 @@ export const AddBook = `
 mutation ($title: String! $author: String) {
   createBook(input: {
     title: $title
-    author: $author
   }) {
-    id title author
+    id title
   }
 }
 `;
@@ -13,7 +12,7 @@ export const ListBooks = `
 query {
   listBooks {
     items {
-      id title author 
+      id title 
     }
   }
 }

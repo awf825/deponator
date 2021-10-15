@@ -5,6 +5,6 @@ I think I solved flex woes with this: https://medium.com/@peterpme/taming-react-
 This should come in handy when trying to link users to resources
 https://aws.amazon.com/blogs/mobile/aws-amplify-allows-you-to-mix-and-match-authorization-modes-in-datastore/
 
-10/5/21 => installed 'react-native-draganddrop-board' as an option. better for mobile and not tablet and kind of away from the original scheme. Library is large and kind of unwieldy, had to '/native' to import of styled components inside of presentational components in the library. Drag and drop grid would be better for tablet 
-
-shouldUseNativeDriver in NativatedAnimatedHelper.js is hard blocked
+10/14/21 => So to deal with data go to amplify backend: GrahpQlAPI. This is where you push/pull the house (???). AppSync
+is where you build the schema and query the database, create dummy data here. DynamoDB is where the actual data lives. There
+seems to be a natural chain of command here: AmpAdmin => AppSync => Dynamo. Good video here for creating data: https://www.youtube.com/watch?v=pZ61oDwrCK0
