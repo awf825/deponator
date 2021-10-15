@@ -8,3 +8,6 @@ https://aws.amazon.com/blogs/mobile/aws-amplify-allows-you-to-mix-and-match-auth
 10/14/21 => So to deal with data go to amplify backend: GrahpQlAPI. This is where you push/pull the house (???). AppSync
 is where you build the schema and query the database, create dummy data here. DynamoDB is where the actual data lives. There
 seems to be a natural chain of command here: AmpAdmin => AppSync => Dynamo. Good video here for creating data: https://www.youtube.com/watch?v=pZ61oDwrCK0
+
+## Bugs
+PanResponder seems to give up after a few rapid touches. Not completely bulletproof. Priority: High
