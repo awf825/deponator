@@ -24,7 +24,7 @@
 	squares to the immediate left will have to move up and all the way to the right. 
 */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {  
   StyleSheet, 
   Text, 
@@ -51,6 +51,18 @@ const styles = StyleSheet.create({
 })
 
 export default function RenderDraggable(props) {
+  // idx will mark what grid locale the res eventually ends up in. 
+  // If props.idx === idx, don't make a write to the database. 
+  const [idx, setIdx] = useState(props.idx);
+  const [position, setPosition] = useState(props.position);
+  // the cardinal directions serve as the left, top, right, and 
+  // bottom boundaries of each grid square
+  const [eastBound, setEastBound] = useState(props.eastBound);
+  const [southBound, setSouthBound] = useState(props.southBound);
+  const [westBound, setWestBound] = useState(props.westBound);
+  const [northBound, setNorthBound] = useState(props.northBound);
+
+
   const pan = useRef(new Animated.ValueXY()).current
 
   const panResponder = useRef(
@@ -74,18 +86,34 @@ export default function RenderDraggable(props) {
         {
         	useNativeDriver: true,
         	listener: (event, gestureState) => {
-        		console.log('onPanResponderMove [event, gesture]: ', event, gestureState)
+        		console.log('onPanResponderMove [event, gestureState]: ', event, gestureState)
         	}
         }
       ),
-      onPanResponderRelease: () => {
-      	// if the user releases the res inside of its own grid square, spring the 
-      	// res back to where it was 
-      	// if the user releases the res inside of another grid square, find out 
-      	// square the res has been pulled from and what square the res is trying to 
-      	// go to. If the release is 'valid', spring the res to its new position. 
-      	// THE RES SHOULD ALWAYS SPRING
-        pan.flattenOffset();
+      onPanResponderRelease: (event, gestureState) => {
+        console.log('onPanResponderRelease [event, gestureState]: ', event, gestureState);
+        const eastBoundCond = gestureState.moveX < eastBound;
+        const southBoundCond = gestureState.moveY < southBound;
+        const westBoundCond = gestureState.moveX > westBound;
+        const northBoundCond = gestureState.moveY > northBound && southBoundCond;
+
+        // console.log('westBound: ', westBound)
+        // console.log('gestureState.moveX: ', gestureState.moveX)
+        // console.log('eastBound: ', eastBound)
+
+        // console.log('eastBoundCond: ', eastBoundCond);
+        // console.log('southBoundCond: ', southBoundCond);
+        // console.log('westBoundCond: ', westBoundCond);
+        // console.log('northBoundCond: ', northBoundCond);
+
+        if (eastBoundCond && southBoundCond && northBoundCond && westBoundCond) {
+          Animated.spring(
+            pan,
+            { toValue: { x: 0, y: 0 } }    
+          ).start();
+        } else {
+          //pan.flattenOffset();
+        }
       }
     })
   ).current;

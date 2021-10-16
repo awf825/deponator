@@ -154,6 +154,10 @@ function App() {
                   }
                   const calcTop = (0+(dy*100))
                   const calcLeft = (0+(dx*w))
+
+                  console.log('calcTop: ', calcTop);
+                  console.log('calcLeft: ', calcLeft);
+
                   const s = StyleSheet.create({
                     gridSquare: {
                       position: 'absolute',
@@ -161,28 +165,35 @@ function App() {
                       top: calcTop,
                       left: calcLeft,
                       width: w,
-                      height: 100
-                      // borderWidth: 1
+                      height: 100,
+                      borderWidth: 1
                     }
                   });
                   return (
                     <View style={s.gridSquare} key={i+1}>
-                      <RenderDraggable idx={i}/>
+                      <RenderDraggable 
+                        idx={i}
+                        westBound={calcLeft}
+                        northBound={calcTop}
+                        eastBound={calcLeft+(w)}
+                        southBound={calcTop+100}
+                        position={b.position}
+                      />
                     </View>
                   )
                 });
     setBoardView(newBoardView)
   }, [books])
 
-  const buildGridState = (evt) => {
-    console.log("evt.nativeEvent @ buildGridState = (evt) => { ", evt.nativeEvent)
-  } 
+  //// const buildGridState = (evt) => {
+  //   /*console.log("evt.nativeEvent @ buildGridState = (evt) => { ", evt.nativeEvent)*/
+  // } 
 
   return (
     <View 
       style={styles.mainContainer}
       // onLayout={(evt) => setDropZoneValues(evt.nativeEvent.layout)}
-      onLayout = {(evt) => buildGridState(evt)}
+      // onLayout = {(evt) => buildGridState(evt)}
     >
       {boardView}
     </View>
