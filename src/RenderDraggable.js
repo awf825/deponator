@@ -126,7 +126,7 @@ export default function RenderDraggable(props) {
         	styles.circle
         ]}
       >
-        <Text style={styles.text}>{props.idx}</Text>
+        <Text style={styles.text}>{props.position}</Text>
       </Animated.View>
   );
 }

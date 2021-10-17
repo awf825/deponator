@@ -136,10 +136,12 @@ function App() {
 
     As the resources are being mapped in this next side effect, i is accounting for the
     position of the 'state grid.' 
+
+    @key(name: "booksByPosition",fields: ["type","position"],queryField: "booksByPosition")
   ***/
 
   useEffect(() => {
-    console.log('books at second useEffect: ', books)
+    console.log('books.sorted at second useEffect: ', books.sort((a,b) => (a.position > b.position) ? 1 : -1))
     const w = Window.width / 3;
     const h = Window.height;
     let dx = 0;
