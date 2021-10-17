@@ -154,6 +154,7 @@ function App() {
                   }
                   const calcTop = (0+(dy*100))
                   const calcLeft = (0+(dx*w))
+                  console.log('book:', b)
 
                   console.log('calcTop: ', calcTop);
                   console.log('calcLeft: ', calcLeft);

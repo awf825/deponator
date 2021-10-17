@@ -7,6 +7,9 @@ export const getBook = /* GraphQL */ `
       id
       title
       author
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -23,10 +26,42 @@ export const listBooks = /* GraphQL */ `
         id
         title
         author
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       nextToken
+      startedAt
+    }
+  }
+`;
+export const syncBooks = /* GraphQL */ `
+  query SyncBooks(
+    $filter: ModelBookFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncBooks(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        title
+        author
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      nextToken
+      startedAt
     }
   }
 `;
