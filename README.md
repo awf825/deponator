@@ -9,5 +9,8 @@ https://aws.amazon.com/blogs/mobile/aws-amplify-allows-you-to-mix-and-match-auth
 is where you build the schema and query the database, create dummy data here. DynamoDB is where the actual data lives. There
 seems to be a natural chain of command here: AmpAdmin => AppSync => Dynamo. Good video here for creating data: https://www.youtube.com/watch?v=pZ61oDwrCK0
 
+10/19/21 => took this out of schema? @key(name: "booksByPosition",fields: ["type","position"],queryField: "booksByPosition")
+I think this was sorting the resources by position
+
 ## Bugs
 PanResponder seems to give up after a few rapid touches. Not completely bulletproof. Priority: High

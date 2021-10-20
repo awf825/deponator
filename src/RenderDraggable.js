@@ -86,25 +86,39 @@ export default function RenderDraggable(props) {
         {
         	useNativeDriver: true,
         	listener: (event, gestureState) => {
-        		console.log('onPanResponderMove [event, gestureState]: ', event, gestureState)
+        		// console.log(
+          //     'onPanResponderMove [event.touchHistory.touchBank.currentPageX, gestureState]: ', 
+          //     event.touchHistory.touchBank.currentPageX, 
+          //     gestureState
+          //   )
         	}
         }
       ),
       onPanResponderRelease: (event, gestureState) => {
-        console.log('onPanResponderRelease [event, gestureState]: ', event, gestureState);
+        console.log('onPanResponderRelease gestureState: ', gestureState);
+        // console.log('event.TouchHistory.touchBank.startPageX:', event.touchHistory.touchBank[0].startPageX)
+        // console.log('event.TouchHistory.touchBank.currentPageX:', event.touchHistory.touchBank[0].currentPageX)
+        // console.log('event.TouchHistory.touchBank.startPageY:', event.touchHistory.touchBank[0].startPageY)
+        // console.log('event.TouchHistory.touchBank.currentPageY:', event.touchHistory.touchBank[0].currentPageY)
+        // const bank = event.touchHistory.touchBank[0];
+        // const horizontalTravel = bank.currentPageX - bank.startPageX;
+        // const verticalTravel = bank.currentPageY - bank.startPageY;
+
+        // const horizontalTravel = event.touchHistory.touchBank[0].currentPageX - event.touchHistory.touchBank[0].startPageX;
+        // const verticalTravel = event.touchHistory.touchBank[0].currentPageY - event.touchHistory.touchBank[0].startPageY;
+
         const eastBoundCond = gestureState.moveX < eastBound;
         const southBoundCond = gestureState.moveY < southBound;
         const westBoundCond = gestureState.moveX > westBound;
         const northBoundCond = gestureState.moveY > northBound && southBoundCond;
 
-        // console.log('westBound: ', westBound)
-        // console.log('gestureState.moveX: ', gestureState.moveX)
-        // console.log('eastBound: ', eastBound)
 
-        // console.log('eastBoundCond: ', eastBoundCond);
-        // console.log('southBoundCond: ', southBoundCond);
-        // console.log('westBoundCond: ', westBoundCond);
-        // console.log('northBoundCond: ', northBoundCond);
+        console.log('gestureState.moveX: ', gestureState.moveX)
+
+        console.log('eastBoundCond: ', eastBoundCond);
+        console.log('southBoundCond: ', southBoundCond);
+        console.log('westBoundCond: ', westBoundCond);
+        console.log('northBoundCond: ', northBoundCond);
 
         if (eastBoundCond && southBoundCond && northBoundCond && westBoundCond) {
           Animated.spring(
@@ -112,6 +126,40 @@ export default function RenderDraggable(props) {
             { toValue: { x: 0, y: 0 } }    
           ).start();
         } else {
+          if (gestureState.dx < 0 && southBoundCond) {
+            Animated.spring(
+              pan,
+              { toValue: { x: -(props.width), y: 0 } }    
+            ).start();
+          } else if (gestureState.dx > props.width && southBoundCond) {
+            Animated.spring(
+              pan,
+              { toValue: { x: props.width, y: 0 } }    
+            ).start();           
+          }
+          // find out which square we landed in !!!!!!!
+            // if horizontalTravel < 0 && southBoundCond, WE WENT LEFT
+              // southboundCond is true ? then I didn't go far enough to leave the square in the south direction
+            // if horizontalTravel > 373.66666 && southBoundCond, WE WENT RIGHT
+
+          // spring to the top left corner of that square !!!!!!!!
+            // left => x: -373.66666, y: 0
+            // right => x: 373.66666, y: 0
+            // up => x: 0, y: -100?
+            // down => x: 0, y: 100
+
+            // down-left => x: -373.66666, y: 100,
+            // down-right => x: 373.66666, y: 100,
+            // up-right => x: 373.66666, y: -100,
+            // up-left => x: -373.66666, y: -100
+            // Animated.spring(
+            //   pan,
+            //   { toValue: { x: 100, y: 100 } }    
+            // ).start();
+
+          // setState to reflect the new bounds  !!!!!!!!
+
+
           //pan.flattenOffset();
         }
       }

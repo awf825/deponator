@@ -79,8 +79,8 @@ let styles = StyleSheet.create({
 function App() {
   const [books, setBooks] = useState([]);
   const [tabIndex, setTabIndex] = useState(0);
-  const [showDraggable, setShowDraggable] = useState(true);
   const [dropZoneValues, setDropZoneValues] = useState(null);
+  const [virtualGrid, setVirtualGrid] = useState([]);
 
   //const [gridZoneValues, setGridZoneValues] = useState(null);
   const [boardView, setBoardView] = useState(null)
@@ -180,6 +180,8 @@ function App() {
                         northBound={calcTop}
                         eastBound={calcLeft+(w)}
                         southBound={calcTop+100}
+                        width={w}
+                        height={h}
                         position={b.position}
                       />
                     </View>
