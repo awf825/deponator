@@ -24,7 +24,12 @@
 	squares to the immediate left will have to move up and all the way to the right. 
 */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { 
+  useRef, 
+  useEffect, 
+  useState,
+  useContext 
+} from 'react';
 import {  
   StyleSheet, 
   Text, 
@@ -32,22 +37,24 @@ import {
   PanResponder,
   Animated
 } from 'react-native';
-let CIRCLE_RADIUS = 36;
 
+import { GridContext, buildGrid } from "./components/contexts/GridContext";
+
+let CIRCLE_RADIUS = 36;
 const styles = StyleSheet.create({
 	circle : {
-        backgroundColor     : '#1abc9c',
-        width               : CIRCLE_RADIUS*2,
-        height              : CIRCLE_RADIUS*2,
-        borderRadius        : CIRCLE_RADIUS
+      backgroundColor     : '#1abc9c',
+      width               : CIRCLE_RADIUS*2,
+      height              : CIRCLE_RADIUS*2,
+      borderRadius        : CIRCLE_RADIUS
     },
-    text : {
-        marginTop   : 25,
-        marginLeft  : 5,
-        marginRight : 5,
-        textAlign   : 'center',
-        color       : '#fff'
-    },
+  text : {
+      marginTop   : 25,
+      marginLeft  : 5,
+      marginRight : 5,
+      textAlign   : 'center',
+      color       : '#fff'
+  },
 })
 
 export default function RenderDraggable(props) {
@@ -55,6 +62,15 @@ export default function RenderDraggable(props) {
   // If props.idx === idx, don't make a write to the database. 
   const [idx, setIdx] = useState(props.idx);
   const [position, setPosition] = useState(props.position);
+  const [state, dispatch] = useContext(GridContext);
+
+  useEffect(() => {
+    var virtualGridSquare = {};
+    var k = props.id;
+    var v = props.position
+    virtualGridSquare[k] = v;
+    dispatch(buildGrid(virtualGridSquare))
+  }, [props])
   // the cardinal directions serve as the left, top, right, and 
   // bottom boundaries of each grid square
   const [eastBound, setEastBound] = useState(props.eastBound);
@@ -62,12 +78,18 @@ export default function RenderDraggable(props) {
   const [westBound, setWestBound] = useState(props.westBound);
   const [northBound, setNorthBound] = useState(props.northBound);
 
-
+  // https://reactjs.org/docs/hooks-reference.html#useref
+  // Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
+  // run the animations by setting these values to the style of the element to animate.
   const pan = useRef(new Animated.ValueXY()).current
 
+  // Create the PanResponder, which is responsible for doing the dragging. We are setting the handlers when the user 
+  // moves and releases the element.
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
+      //The handler will trigger when the element is moving. 
+      //We need to set the animated values to perform the dragging correctly.
       onPanResponderGrant: () => {
         pan.setOffset({
           x: pan.x._value,
@@ -170,6 +192,8 @@ export default function RenderDraggable(props) {
       <Animated.View 
         {...panResponder.panHandlers}
         style={[
+          // getLayout method returns the left and top properties with the correct 
+          // values for each frame during the animation.
         	pan.getLayout(), 
         	styles.circle
         ]}
@@ -178,44 +202,3 @@ export default function RenderDraggable(props) {
       </Animated.View>
   );
 }
-
-/*
-    //// useRef returns a mutable ref object whose .current property is initialized to the passed argument (initialValue). 
-    // The returned object will persist for the full lifetime of the component. 
-    // https://reactjs.org/docs/hooks-reference.html#useref
-
-    // 1) Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
-    // run the animations by setting these values to the style of the element to animate.
-
-    // 2) Create the PanResponder, which is responsible for doing the dragging. We are setting the handlers when the user 
-    // moves and releases the element.
-
-    // 3) The handler will trigger when the element is moving. We need to set the animated values to perform the dragging correctly.
-    
-    // 4) Write the code to execute when the element is released. For now it is empty, but soon we will animate the circle 
-    // back to the center.
-
-    // pan: 
-    //   The getLayout method returns the left and top properties with the correct values for each frame during the animation.
-
-    //   Use the Animated.spring method to run the animation. This method will run the animation at a constant speed and 
-    //   we can control the friction and tension. The first parameter accepts the animation values. The second parameter 
-    //   is a configuration object. Here, we are defining only the toValue, which is the origin coordinates. This 
-    //   will return the circle to the middle.
-
-  //I've gone ahead and set two panResponders. This actually works, BUT both orbs are bound to the same state. 
-  // My grid will have a different state handling scheme:
-  
-  //    At the level of each 'card', need to know if the card is selected. If thats the case, I need to know what grid 
-  //    position the card is in, what position(s) its 'hovered' over, and what position its dropped in, and if 
-  //    that position is even valid. If its not valid, the card needs to be bounced back to where it was selected from. 
-  //    If it IS valid, that card can be dropped, but the other cards need to be updated accordingly, this is a good 
-  //    into the 'grid', 'wrapper' or 'parent' state.
-
-  //    The grid needs to be aware of the order of the cards as the user updates them. This wil most likely come down to 
-  //    attaching a property at the deeper level of the card resources in the backend. I think a sound approach to dealing 
-  //    with the grid would be designing dimensions based entirely upon the number of resources created/available and storing 
-  //    the dimensions in state. For example, if I have 9 resources, I will have a 3x3 grid (on tablet). If I add two resources
-  //    totalling 11, I will make sure the state is appraised of the fact that my grid is 4x3+2, and that that 3rd slot in
-  //    the 4th row is OFF LIMITS. 
-*/

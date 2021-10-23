@@ -16,22 +16,25 @@
   environments, deep links to provisioned resources per Amplify category, status of recent deployments, and instructions on how to promote, 
   clone, pull, and delete backend resources.
 */
-
-// import { withAuthenticator } from 'aws-amplify-react-native';
+/* REACT AND RN */
 import { 
-  TextInput, 
-  Button, 
   StyleSheet, 
   Text, 
   View,
-  PanResponder,
-  Animated,
   Dimensions
 } from 'react-native';
+import React, { 
+  useState, 
+  useEffect, 
+  useRef,
+  useReducer
+} from 'react';
+
+/* AWS AMPLIFY */
 import Amplify from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react-native'
+import { API, graphqlOperation } from '@aws-amplify/api';
 import awsmobile from './aws-exports';
-
 Amplify.configure({
   ...awsmobile,
   Analytics: {
@@ -39,57 +42,49 @@ Amplify.configure({
   },
 });
 
-import { API, graphqlOperation } from '@aws-amplify/api';
-import React, { 
-  useState, 
-  useEffect, 
-  useRef 
-} from 'react';
+/* IMPORTED COMPONENTS */
 import { ListBooks, AddBook } from './src/components/graphql.js';
 import RenderDraggable from './src/RenderDraggable.js';
 // import { Tab } from 'react-native-elements';
 import AddBooks from './src/components/AddBook.js';
+
+import {
+  GridContext,
+  gridReducer,
+} from "./src/components/contexts/GridContext";
+
+/* STYLES AND MISC */
 let Window = Dimensions.get('window');
-console.log("Dimensions.get('window'): ", Window)
 let styles = StyleSheet.create({
     mainContainer: {
         flex    : 1
-    },
-    container: {
-      flex: 1,
-      backgroundColor: 'black',
-      paddingHorizontal: 10,
-      paddingTop: 50
-    },
-    input: {
-      // height: 50,
-      borderBottomWidth: 2,
-      borderBottomColor: 'blue',
-      marginVertical: 10
     },
     book: {
       borderBottomWidth: 1,
       borderBottomColor: '#ddd',
       paddingVertical: 10
-    },
-    title: { fontSize: 16 },
-    author: { color: 'rgba(0, 0, 0, .5)' }
+    }
 });
 
 function App() {
+  // gather user resources
   const [books, setBooks] = useState([]);
-  const [tabIndex, setTabIndex] = useState(0);
-  const [dropZoneValues, setDropZoneValues] = useState(null);
-  const [virtualGrid, setVirtualGrid] = useState([]);
-
-  //const [gridZoneValues, setGridZoneValues] = useState(null);
-  const [boardView, setBoardView] = useState(null)
+  // boardView built with resources and passed as children to main view
+  const [boardView, setBoardView] = useState(null);
+  // use context and reducer hooks to build a virtual rep of the grid state
+  const [gridState, dispatch] = useReducer(
+    gridReducer, 
+    { grid: [] }
+  )
 
   useEffect(() => {
     const getResult = async () => {
       const books = await API.graphql(graphqlOperation(ListBooks));
-      // console.log('books: ', books)
-      setBooks(books.data.listBooks.items);
+      // sort books so graphql doesn't have to
+      const stateOut = books.data.listBooks.items.sort((a,b) => {
+        return (a.position > b.position) ? 1 : -1
+      })
+      setBooks(stateOut);
     };
 
     try {
@@ -112,36 +107,7 @@ function App() {
     and (dynamic based on width) left sides of each square.    
   */
 
-  /***
-    Instead of saving on the fly to the database, save to the database when the user closes the
-    work 'session.' This way, the positions of the cards will be completely ephemeral—they will not 
-    need to be consistenly stored to the db, saving writes. This will go down something like this:
-
-    Say three resources are coming back from db when app mounts, writing array of objects for ease of 
-    reading. These resources are fresh and have not been tampered with, as id === position in each case:
-    [
-      {
-        id: 0,
-        position: 0,
-      },
-      {
-        id: 1,
-        position: 1
-      },
-      {
-        id: 2,
-        id: 2,
-      }
-    ]
-
-    As the resources are being mapped in this next side effect, i is accounting for the
-    position of the 'state grid.' 
-
-    @key(name: "booksByPosition",fields: ["type","position"],queryField: "booksByPosition")
-  ***/
-
   useEffect(() => {
-    console.log('books.sorted at second useEffect: ', books.sort((a,b) => (a.position > b.position) ? 1 : -1))
     const w = Window.width / 3;
     const h = Window.height;
     let dx = 0;
@@ -182,6 +148,7 @@ function App() {
                         southBound={calcTop+100}
                         width={w}
                         height={h}
+                        id={b.id}
                         position={b.position}
                       />
                     </View>
@@ -190,18 +157,15 @@ function App() {
     setBoardView(newBoardView)
   }, [books])
 
-  //// const buildGridState = (evt) => {
-  //   /*console.log("evt.nativeEvent @ buildGridState = (evt) => { ", evt.nativeEvent)*/
-  // } 
-
   return (
-    <View 
-      style={styles.mainContainer}
-      // onLayout={(evt) => setDropZoneValues(evt.nativeEvent.layout)}
-      // onLayout = {(evt) => buildGridState(evt)}
-    >
-      {boardView}
-    </View>
+    <GridContext.Provider value={[gridState, dispatch]}>    
+      <View 
+        style={styles.mainContainer}
+        // onLayout = {(evt) => buildGridState(evt)}
+      >
+        {boardView}
+      </View>
+    </GridContext.Provider>
   );
 }
 
