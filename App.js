@@ -146,16 +146,21 @@ function App() {
                         northBound={calcTop}
                         eastBound={calcLeft+(w)}
                         southBound={calcTop+100}
-                        width={w}
-                        height={h}
+                        width={Window.width}
+                        height={Window.height}
+                        row={dy+1}
+                        column={dx+1}
                         id={b.id}
                         position={b.position}
+                        // gridState={gridState}
                       />
                     </View>
                   )
                 });
     setBoardView(newBoardView)
   }, [books])
+
+  
 
   return (
     <GridContext.Provider value={[gridState, dispatch]}>    

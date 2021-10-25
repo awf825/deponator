@@ -38,7 +38,11 @@ import {
   Animated
 } from 'react-native';
 
-import { GridContext, buildGrid } from "./components/contexts/GridContext";
+import { 
+  GridContext, 
+  buildGrid, 
+  changeColumn
+} from "./components/contexts/GridContext";
 
 let CIRCLE_RADIUS = 36;
 const styles = StyleSheet.create({
@@ -62,7 +66,7 @@ export default function RenderDraggable(props) {
   // If props.idx === idx, don't make a write to the database. 
   const [idx, setIdx] = useState(props.idx);
   const [position, setPosition] = useState(props.position);
-  const [state, dispatch] = useContext(GridContext);
+  const [gridState, dispatch] = useContext(GridContext);
 
   useEffect(() => {
     var virtualGridSquare = {};
@@ -71,12 +75,34 @@ export default function RenderDraggable(props) {
     virtualGridSquare[k] = v;
     dispatch(buildGrid(virtualGridSquare))
   }, [props])
+
+  useEffect(() => {
+    // this is definitely triggering when the grid is built
+    // need it to trigger when ANY res is toggled
+    console.log('gridState: ', gridState);
+  }, [gridState.grid])
+
+
+
+  // useEffect(() => {
+  //   // update gridState change here
+  //   logUpdatedGridState();
+  //   //console.log('grid context has changed! props.id: ', props.id)
+  // }, [gridState])
+
+  // function logUpdatedGridState() {
+  //   console.log('grid context has changed! props.id: ', props.id)
+  // }
   // the cardinal directions serve as the left, top, right, and 
   // bottom boundaries of each grid square
   const [eastBound, setEastBound] = useState(props.eastBound);
   const [southBound, setSouthBound] = useState(props.southBound);
   const [westBound, setWestBound] = useState(props.westBound);
   const [northBound, setNorthBound] = useState(props.northBound);
+  const [column, setColumn] = useState(props.column);
+  const [row, setRow] = useState(props.row);
+  const oneColumn = (props.width / 3);
+  const oneRow = (props.height / 3);
 
   // https://reactjs.org/docs/hooks-reference.html#useref
   // Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
@@ -91,6 +117,8 @@ export default function RenderDraggable(props) {
       //The handler will trigger when the element is moving. 
       //We need to set the animated values to perform the dragging correctly.
       onPanResponderGrant: () => {
+        console.log('height: ', props.height);
+        console.log('width: ', props.width);
         pan.setOffset({
           x: pan.x._value,
           y: pan.y._value
@@ -108,9 +136,55 @@ export default function RenderDraggable(props) {
         {
         	useNativeDriver: true,
         	listener: (event, gestureState) => {
+            // I may not need the cardinal dir bounds, but, on the fly, if I have 
+            // TWO grid resources with the same position, I can have the reducer 
+            // method act accordingly and bounce the unheld res
+
+            // The immediate bounds of each grid square is not exactly what I need. 
+            // What I need is to know what 'sector' of the screen the resouce is
+            // hovering over. From there, I can phone the reducer and let it know 
+            // what resource(s) is/are in what square 
+            // if x is LESS THAN 1/3 OF WIDTH, it is in column 1
+            // if y is LESS THAN 1/3 OF HEIGHT, it is in row 1
+
+
+            // if x is LESS THAN 2/3 OF WIDTH BUT ALSO GREATER THAN 1/3 OF WIDTH, it is in column 2
+            // if y is LESS THAN 2/3 OF HEIGHT BUT ALSO GREATER THAN 1/3 OF HEIGHT, it is in row 2
+
+            // if x is GREATER THAN 2/3 OF WIDTH, it is in column 3
+            // if y is GREATER THAN 2/3 OF HEIGHT, it is in row 3
+            if ((gestureState.moveX >= oneColumn) && (gestureState.moveX < (oneColumn*2))) {
+              if (column === 2) {
+                //console.log('state has not changed here in column 2');
+              } else {
+                console.log('dispatch?')
+                dispatch(changeColumn(2, props.position, props.id))
+                //setColumn(2);
+                //console.log('res is now in column 2');
+              }
+              //setColumn(2);
+            } else if (gestureState.moveX < oneColumn)  {
+              if (column === 1) {
+                console.log('state has not changed here in column 1')
+              } else {
+                //console.log('res is now in column 1');
+                dispatch(changeColumn(1, props.position, props.id));
+                //setColumn(1);
+              }
+              // setColumn(1);
+            } else {
+              if (column === 3) {
+                console.log('state has not changed here in column 3')
+              } else {
+                console.log('res is now in column 3');
+                dispatch(changeColumn(3, props.position, props.id));
+                //setColumn(3);
+              }
+              //setColumn(3);
+            }
         		// console.log(
-          //     'onPanResponderMove [event.touchHistory.touchBank.currentPageX, gestureState]: ', 
-          //     event.touchHistory.touchBank.currentPageX, 
+          //     'onPanResponderMove [event, gestureState]: ', 
+          //     event, 
           //     gestureState
           //   )
         	}
@@ -151,7 +225,7 @@ export default function RenderDraggable(props) {
           if (gestureState.dx < 0 && southBoundCond) {
             Animated.spring(
               pan,
-              { toValue: { x: -(props.width), y: 0 } }    
+              { toValue: { x: -(oneColumn), y: 0 } }    
             ).start();
           } else if (gestureState.dx > props.width && southBoundCond) {
             Animated.spring(
