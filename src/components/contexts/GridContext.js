@@ -25,35 +25,19 @@ export const gridReducer = (state, action) => {
       };
       // state.grid.push(action.payload)
     case "TOG_COL":
-      // console.log('action.payload @ TOG_COL: ', action.payload);
-      // console.log('state.grid: ', state.grid)
-      const expectedPosition = state.grid.filter(gs => gs[action.payload.id])
-      if (expectedPosition !== undefined) {
-        if (expectedPosition === action.payload.pos) {
-          return true;
-        } else {
-          // state.grid.forEach(gs=>{
-          //   if (gs[action.payload.id]) {
-          //       var x = gs[action.payload.id];
-          //       return { 
-          //         ...state, 
-          //         grid: [...state.grid, state.grid[x]: action.payload.pos-1]
-          //       }
-          //       //gs[action.payload.id] = action.payload.pos-1
-          //   }
-          // })
-        }
-        return state
-      } else {
-        console.log('expectedPosition IS undefined')
+      // I NEED TO CHANGE POSITION OF RESOURCE BY ID TO COL - 1 (FOR NOW, SINCE I ONLY HAVE 3 CELLS)
+      const newPosition = (action.payload.col - 1);
+      // find the resource I'm moving, then change the position to the column I've moved to
+      const newGrid = state.grid.map(gg => 
+        gg[action.payload.id]
+        ? {...gg, [action.payload.id]: newPosition }
+        : gg
+      )
+      // update state/context so other resources can see
+      return {
+        ...state,
+        grid: newGrid
       }
-      // if (state.grid.length > 0) {
-      //   // returns single integer
-      //   const expectedPosition = state.grid.filter(gs => gs[action.payload.id])[0][action.payload.id];
-      //   if (expectedPosition !== payload.pos) {
-      //     console.log('expectedPosition !== payload.pos')
-      //   }
-      // }
     default:
       return state;
   }
