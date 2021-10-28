@@ -99,11 +99,11 @@ function App() {
 
     Initialize the height of the device window (static) as well as the width of what each block
     will be (arbitrarily 3, but this can be based on a user setting or the window width itself).
-    Additionally, init 'tick' values for both the x and y axis.
+    Additionally, init 'tick' values for both the x and y axis (dx,dy).
 
     As the books are looped through, reconcile the tick values on each iteration. If i%3 is 
     bouncing to 0, this means we should start a new row (dx = 0, dy + 1). In any other event, 
-    given that i > 0, dx should tick up. Use the tick values to calculate the (arbitrary) top
+    given that i%3 != 0, dx should tick up. Use the tick values to calculate the (arbitrary) top
     and (dynamic based on width) left sides of each square.    
   */
 

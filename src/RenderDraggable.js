@@ -77,10 +77,20 @@ export default function RenderDraggable(props) {
   }, [props])
 
   useEffect(() => {
-    // this is definitely triggering when the grid is built
-    // need it to trigger when ANY res is toggled
-    console.log('gridState: ', gridState);
-  }, [gridState.grid])
+    // get the actionPosition from the updated gridStatre and mash it into a number
+    const actionPosition = Number(gridState.grid.map(gg => gg[props.id]).filter(x=>x!=undefined))
+    // compare it against the current position
+    if (actionPosition !== position) {
+      const delta = (actionPosition - position);
+      // if delta is negative, we can glean something about what the direction of the motion should be 
+      console.log('props.id: ', props.id);
+      console.log('WEGOTACTION');
+      // so now, not only do I have to change the position of this res in the gridState object 
+      // (which will in turn trigger this effect!) but, in the reducer, I will also need to find 
+      // what res is currently at the actionPosition, send the reducer method both the actionPosition
+      // and this delta variable and go from there
+    }
+  }, [gridState])
 
 
 
@@ -157,7 +167,6 @@ export default function RenderDraggable(props) {
               if (column === 2) {
                 //console.log('state has not changed here in column 2');
               } else {
-                console.log('dispatch?')
                 dispatch(changeColumn(2, props.position, props.id))
                 //setColumn(2);
                 //console.log('res is now in column 2');
