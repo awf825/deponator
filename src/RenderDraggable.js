@@ -41,7 +41,8 @@ import {
 import { 
   GridContext, 
   buildGrid, 
-  changeColumn
+  changeColumn,
+  calcMotion
 } from "./components/contexts/GridContext";
 
 let CIRCLE_RADIUS = 36;
@@ -70,9 +71,8 @@ export default function RenderDraggable(props) {
 
   useEffect(() => {
     var virtualGridSquare = {};
-    var k = props.id;
-    var v = props.position
-    virtualGridSquare[k] = v;
+    virtualGridSquare['id'] = props.id;
+    virtualGridSquare['pos'] = props.position;
     dispatch(buildGrid(virtualGridSquare))
   }, [props])
 
@@ -83,13 +83,23 @@ export default function RenderDraggable(props) {
     if (actionPosition !== position) {
       const delta = (actionPosition - position);
       // if delta is negative, we can glean something about what the direction of the motion should be 
-      console.log('props.id: ', props.id);
-      console.log('WEGOTACTION');
+      //console.log('props.id: ', props.id);
+      //console.log('WEGOTACTION');
+
+      //dispatch(calcMotion(delta));
+
       // so now, not only do I have to change the position of this res in the gridState object 
       // (which will in turn trigger this effect!) but, in the reducer, I will also need to find 
       // what res is currently at the actionPosition, send the reducer method both the actionPosition
       // and this delta variable and go from there
+    } else {
+      // find if there is a doubled value
+      //debugger
+      // if there is in fact a doubled value, find out why, and move accordingly?
+
     }
+    // IF MY ACTION POSITON IS THE SAME AS MY POSITION, MEANING I HAVENT MOVED, I WANT TO CHECK TO SEE IF ANYONE IS IN MY 
+    // GRID SQUARE 
   }, [gridState])
 
 

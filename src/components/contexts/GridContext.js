@@ -14,6 +14,13 @@ export const changeColumn = (col, pos, id) => ({
   } 
 })
 
+export const calcMotion = (delta) => ({
+  type: "CALC_MOTION",
+  payload: {
+    delta: delta
+  } 
+})
+
 export const GridContext = React.createContext({});
 
 export const gridReducer = (state, action) => {
@@ -38,6 +45,9 @@ export const gridReducer = (state, action) => {
         ...state,
         grid: newGrid
       }
+    case "CALC_MOTION":
+      console.log('[delta, state.grid]: ', action.payload.delta, state.grid)
+      return state;
     default:
       return state;
   }
