@@ -67,7 +67,9 @@ export default function RenderDraggable(props) {
   // If props.idx === idx, don't make a write to the database. 
   const [idx, setIdx] = useState(props.idx);
   const [position, setPosition] = useState(props.position);
+  const [delta, setDelta] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
+  const gridRef = useRef({});
 
   useEffect(() => {
     var virtualGridSquare = {};
@@ -77,11 +79,16 @@ export default function RenderDraggable(props) {
   }, [props])
 
   useEffect(() => {
+    const actionObj = gridState.grid.find(x => (x['id'] === props.id))
+    //debugger
     // get the actionPosition from the updated gridStatre and mash it into a number
-    const actionPosition = Number(gridState.grid.map(gg => gg[props.id]).filter(x=>x!=undefined))
+    // const actionPosition = Number(gridState.grid.map(gg => gg[props.id]).filter(x=>x!=undefined))
     // compare it against the current position
-    if (actionPosition !== position) {
-      const delta = (actionPosition - position);
+    if (actionObj && (actionObj.pos !== position)) {
+      const delta = (actionObj.pos - position);
+      dispatch(calcMotion(delta))
+      //setDelta(delta);
+      //setPosition(actionObj.pos)
       // if delta is negative, we can glean something about what the direction of the motion should be 
       //console.log('props.id: ', props.id);
       //console.log('WEGOTACTION');
@@ -92,15 +99,25 @@ export default function RenderDraggable(props) {
       // (which will in turn trigger this effect!) but, in the reducer, I will also need to find 
       // what res is currently at the actionPosition, send the reducer method both the actionPosition
       // and this delta variable and go from there
-    } else {
-      // find if there is a doubled value
-      //debugger
-      // if there is in fact a doubled value, find out why, and move accordingly?
-
     }
+      // find if there is a doubled value by lining up values from pairs
+      // if id !== props.id AND pos === position 
     // IF MY ACTION POSITON IS THE SAME AS MY POSITION, MEANING I HAVENT MOVED, I WANT TO CHECK TO SEE IF ANYONE IS IN MY 
     // GRID SQUARE 
   }, [gridState])
+
+  // useEffect(() => {
+  //   console.log('we are moving! props.id:', props.id)
+  // }, [gridState.moving])
+
+  // useEffect(() => {
+  //   setPosition(delta+position)
+  // }, [delta])
+
+  // useEffect(() => {
+  //    console.log('id @ 4th effect:', props.id)
+  //    console.log('pan @ fourth effect:', pan)
+  // }, [position])
 
 
 
@@ -133,12 +150,14 @@ export default function RenderDraggable(props) {
   // moves and releases the element.
   const panResponder = useRef(
     PanResponder.create({
+      // onStartShouldSetPanResponder: () => console.log('onStartShouldSetPanResponder', props.id)
+      // onStartShouldSetPanResponderCapture: () => console.log('onStartShouldSetPanResponderCapture', props.id)
       onMoveShouldSetPanResponder: () => true,
+
+      // onMoveShouldSetPanResponderCapture: () => console.log('onMoveShouldSetPanResponderCapture')
       //The handler will trigger when the element is moving. 
       //We need to set the animated values to perform the dragging correctly.
       onPanResponderGrant: () => {
-        console.log('height: ', props.height);
-        console.log('width: ', props.width);
         pan.setOffset({
           x: pan.x._value,
           y: pan.y._value
@@ -184,7 +203,7 @@ export default function RenderDraggable(props) {
               //setColumn(2);
             } else if (gestureState.moveX < oneColumn)  {
               if (column === 1) {
-                console.log('state has not changed here in column 1')
+                //console.log('state has not changed here in column 1')
               } else {
                 //console.log('res is now in column 1');
                 dispatch(changeColumn(1, props.position, props.id));
@@ -193,9 +212,9 @@ export default function RenderDraggable(props) {
               // setColumn(1);
             } else {
               if (column === 3) {
-                console.log('state has not changed here in column 3')
+                //console.log('state has not changed here in column 3')
               } else {
-                console.log('res is now in column 3');
+                //console.log('res is now in column 3');
                 dispatch(changeColumn(3, props.position, props.id));
                 //setColumn(3);
               }

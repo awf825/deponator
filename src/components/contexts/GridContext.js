@@ -33,21 +33,22 @@ export const gridReducer = (state, action) => {
       // state.grid.push(action.payload)
     case "TOG_COL":
       // I NEED TO CHANGE POSITION OF RESOURCE BY ID TO COL - 1 (FOR NOW, SINCE I ONLY HAVE 3 CELLS)
-      const newPosition = (action.payload.col - 1);
-      // find the resource I'm moving, then change the position to the column I've moved to
-      const newGrid = state.grid.map(gg => 
-        gg[action.payload.id]
-        ? {...gg, [action.payload.id]: newPosition }
-        : gg
-      )
-      // update state/context so other resources can see
+      const vg = state.grid;
+      const newPos = (action.payload.col - 1);
+      const idx = state.grid.findIndex(gg => gg['id'] === action.payload.id);
+      vg[idx].pos = newPos;
+
       return {
         ...state,
-        grid: newGrid
+        grid: vg
       }
     case "CALC_MOTION":
       console.log('[delta, state.grid]: ', action.payload.delta, state.grid)
-      return state;
+      return {
+        ...state,
+        moving: true,
+        delta: action.payload.delta
+      };
     default:
       return state;
   }

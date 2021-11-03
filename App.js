@@ -74,7 +74,11 @@ function App() {
   // use context and reducer hooks to build a virtual rep of the grid state
   const [gridState, dispatch] = useReducer(
     gridReducer, 
-    { grid: [] }
+    { 
+      grid: [],
+      moving: false,
+      delta: 0
+    }
   )
 
   useEffect(() => {
