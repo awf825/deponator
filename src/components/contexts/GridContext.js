@@ -14,12 +14,12 @@ export const changeColumn = (col, pos, id) => ({
   } 
 })
 
-export const calcMotion = (delta) => ({
-  type: "CALC_MOTION",
-  payload: {
-    delta: delta
-  } 
-})
+// export const reconcile = (delta) => ({
+//   type: "RECONCILE",
+//   payload: {
+//     delta: delta
+//   } 
+// })
 
 export const GridContext = React.createContext({});
 
@@ -42,13 +42,13 @@ export const gridReducer = (state, action) => {
         ...state,
         grid: vg
       }
-    case "CALC_MOTION":
-      console.log('[delta, state.grid]: ', action.payload.delta, state.grid)
-      return {
-        ...state,
-        moving: true,
-        delta: action.payload.delta
-      };
+    // case "RECONCILE":
+    //   console.log('[delta, state.grid]: ', action.payload.delta, state.grid)
+    //   return {
+    //     ...state,
+    //     moving: true,
+    //     delta: action.payload.delta
+    //   };
     default:
       return state;
   }

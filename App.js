@@ -52,6 +52,10 @@ import {
   GridContext,
   gridReducer,
 } from "./src/components/contexts/GridContext";
+import {
+  MotionContext,
+  motionReducer,
+} from "./src/components/contexts/MotionContext";
 
 /* STYLES AND MISC */
 let Window = Dimensions.get('window');
@@ -75,10 +79,17 @@ function App() {
   const [gridState, dispatch] = useReducer(
     gridReducer, 
     { 
-      grid: [],
-      moving: false,
-      delta: 0
+      grid: []
     }
+  )
+
+  const [motionState, dispatchMotion] = useReducer(
+    motionReducer,
+    {
+      moving: null,
+      toMove: null
+    }
+
   )
 
   useEffect(() => {
@@ -167,14 +178,16 @@ function App() {
   
 
   return (
-    <GridContext.Provider value={[gridState, dispatch]}>    
-      <View 
-        style={styles.mainContainer}
-        // onLayout = {(evt) => buildGridState(evt)}
-      >
-        {boardView}
-      </View>
-    </GridContext.Provider>
+    <MotionContext.Provider value={[motionState, dispatchMotion]}>
+      <GridContext.Provider value={[gridState, dispatch]}>    
+        <View 
+          style={styles.mainContainer}
+          // onLayout = {(evt) => buildGridState(evt)}
+        >
+          {boardView}
+        </View>
+      </GridContext.Provider>
+    </MotionContext.Provider>
   );
 }
 

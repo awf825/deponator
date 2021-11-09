@@ -41,9 +41,13 @@ import {
 import { 
   GridContext, 
   buildGrid, 
-  changeColumn,
-  calcMotion
+  changeColumn
 } from "./components/contexts/GridContext";
+
+import { 
+  MotionContext, 
+  reconcile
+} from "./components/contexts/MotionContext";
 
 let CIRCLE_RADIUS = 36;
 const styles = StyleSheet.create({
@@ -69,6 +73,7 @@ export default function RenderDraggable(props) {
   const [position, setPosition] = useState(props.position);
   const [delta, setDelta] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
+  const [motionState, dispatchMotion] = useContext(MotionContext);
   const gridRef = useRef({});
 
   useEffect(() => {
@@ -86,7 +91,9 @@ export default function RenderDraggable(props) {
     // compare it against the current position
     if (actionObj && (actionObj.pos !== position)) {
       const delta = (actionObj.pos - position);
-      dispatch(calcMotion(delta))
+      dispatchMotion(reconcile(props.id, delta, position, gridState))
+      return;
+      //dispatch(calcMotion(delta))
       //setDelta(delta);
       //setPosition(actionObj.pos)
       // if delta is negative, we can glean something about what the direction of the motion should be 
@@ -105,10 +112,6 @@ export default function RenderDraggable(props) {
     // IF MY ACTION POSITON IS THE SAME AS MY POSITION, MEANING I HAVENT MOVED, I WANT TO CHECK TO SEE IF ANYONE IS IN MY 
     // GRID SQUARE 
   }, [gridState])
-
-  // useEffect(() => {
-  //   console.log('we are moving! props.id:', props.id)
-  // }, [gridState.moving])
 
   // useEffect(() => {
   //   setPosition(delta+position)
