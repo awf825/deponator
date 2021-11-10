@@ -86,8 +86,7 @@ function App() {
   const [motionState, dispatchMotion] = useReducer(
     motionReducer,
     {
-      moving: null,
-      toMove: null
+      movingList: []
     }
 
   )

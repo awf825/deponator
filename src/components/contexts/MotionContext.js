@@ -16,15 +16,21 @@ export const motionReducer = (state, action) => {
 	switch (action.type) {
 		case "RCNCL":
 			var grid = action.payload.gridState.grid;
-			var moving = grid.findIndex(x => (x['id'] === action.payload.id));
-			var toMove = grid[moving+action.payload.delta];
-			// find position of the id of the res moving
-			// use delta to find id of the first res that needs to move
-			// set the resources in motion?
-			console.log('reconcile action.payload:', action.payload)
+			var idxOfMoving = grid.findIndex(x => (x['id'] === action.payload.id));
+			var toMove = grid[idxOfMoving+action.payload.delta];
+			//debugger
+			var motionArray = [
+				{
+					'id': action.payload.id,
+					'pos': action.payload.position
+				},
+				{
+					'id': toMove['id'],
+					'pos': toMove['pos']
+				}
+			]
 			return {
-				moving: action.payload.id,
-				toMove: toMove['id']
+				movingList: motionArray
 			}
 		default:
 			return state

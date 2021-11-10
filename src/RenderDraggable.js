@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   },
 })
 
+
 export default function RenderDraggable(props) {
   // idx will mark what grid locale the res eventually ends up in. 
   // If props.idx === idx, don't make a write to the database. 
@@ -74,7 +75,8 @@ export default function RenderDraggable(props) {
   const [delta, setDelta] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
   const [motionState, dispatchMotion] = useContext(MotionContext);
-  const gridRef = useRef({});
+  const oneColumn = (props.width / 3);
+  const oneRow = (props.height / 3);
 
   useEffect(() => {
     var virtualGridSquare = {};
@@ -117,10 +119,19 @@ export default function RenderDraggable(props) {
   //   setPosition(delta+position)
   // }, [delta])
 
-  // useEffect(() => {
-  //    console.log('id @ 4th effect:', props.id)
-  //    console.log('pan @ fourth effect:', pan)
-  // }, [position])
+  useEffect(() => {
+      var mL = motionState.movingList;
+      if (mL && (mL.length > 0)) {
+        if (mL[1]['id'] === props.id) {
+          console.log('I match motion to be: ', mL, props.id)
+          const delta = (mL[0]['pos'] - mL[1]['pos'])
+          Animated.spring(
+            pan,
+            { toValue: { x: oneColumn, y: 0 } }    
+          ).start();
+        } 
+      }
+  }, [motionState])
 
 
 
@@ -141,8 +152,6 @@ export default function RenderDraggable(props) {
   const [northBound, setNorthBound] = useState(props.northBound);
   const [column, setColumn] = useState(props.column);
   const [row, setRow] = useState(props.row);
-  const oneColumn = (props.width / 3);
-  const oneRow = (props.height / 3);
 
   // https://reactjs.org/docs/hooks-reference.html#useref
   // Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
