@@ -41,7 +41,8 @@ import {
 import { 
   GridContext, 
   buildGrid, 
-  changeColumn
+  changeColumn,
+  togglePassive
 } from "./components/contexts/GridContext";
 
 import { 
@@ -68,11 +69,10 @@ const styles = StyleSheet.create({
 
 
 export default function RenderDraggable(props) {
-  // idx will mark what grid locale the res eventually ends up in. 
-  // If props.idx === idx, don't make a write to the database. 
-  const [idx, setIdx] = useState(props.idx);
   const [position, setPosition] = useState(props.position);
   const [delta, setDelta] = useState(null);
+  const [moving, setIsMoving] = useState(false);
+  const [outgoingPosition, setOutgoingPosition] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
   const [motionState, dispatchMotion] = useContext(MotionContext);
   const oneColumn = (props.width / 3);
@@ -87,37 +87,12 @@ export default function RenderDraggable(props) {
 
   useEffect(() => {
     const actionObj = gridState.grid.find(x => (x['id'] === props.id))
-    //debugger
-    // get the actionPosition from the updated gridStatre and mash it into a number
-    // const actionPosition = Number(gridState.grid.map(gg => gg[props.id]).filter(x=>x!=undefined))
-    // compare it against the current position
     if (actionObj && (actionObj.pos !== position)) {
       const delta = (actionObj.pos - position);
       dispatchMotion(reconcile(props.id, delta, position, gridState))
       return;
-      //dispatch(calcMotion(delta))
-      //setDelta(delta);
-      //setPosition(actionObj.pos)
-      // if delta is negative, we can glean something about what the direction of the motion should be 
-      //console.log('props.id: ', props.id);
-      //console.log('WEGOTACTION');
-
-      //dispatch(calcMotion(delta));
-
-      // so now, not only do I have to change the position of this res in the gridState object 
-      // (which will in turn trigger this effect!) but, in the reducer, I will also need to find 
-      // what res is currently at the actionPosition, send the reducer method both the actionPosition
-      // and this delta variable and go from there
     }
-      // find if there is a doubled value by lining up values from pairs
-      // if id !== props.id AND pos === position 
-    // IF MY ACTION POSITON IS THE SAME AS MY POSITION, MEANING I HAVENT MOVED, I WANT TO CHECK TO SEE IF ANYONE IS IN MY 
-    // GRID SQUARE 
   }, [gridState])
-
-  // useEffect(() => {
-  //   setPosition(delta+position)
-  // }, [delta])
 
   useEffect(() => {
       var mL = motionState.movingList;
@@ -125,25 +100,20 @@ export default function RenderDraggable(props) {
         if (mL[1]['id'] === props.id) {
           console.log('I match motion to be: ', mL, props.id)
           const delta = (mL[0]['pos'] - mL[1]['pos'])
+          //debugger
+          // TODO for full grid motion logic to move to next row 
+          const vector = (oneColumn*delta)
           Animated.spring(
             pan,
-            { toValue: { x: oneColumn, y: 0 } }    
-          ).start();
+            { toValue: { x: vector, y: 0 } }    
+          ).start(() => {
+            setPosition(motionState.movingList[1]['new'])
+            setColumn(motionState.movingList[1]['new']+1)
+            dispatch(togglePassive())
+          })
         } 
       }
   }, [motionState])
-
-
-
-  // useEffect(() => {
-  //   // update gridState change here
-  //   logUpdatedGridState();
-  //   //console.log('grid context has changed! props.id: ', props.id)
-  // }, [gridState])
-
-  // function logUpdatedGridState() {
-  //   console.log('grid context has changed! props.id: ', props.id)
-  // }
   // the cardinal directions serve as the left, top, right, and 
   // bottom boundaries of each grid square
   const [eastBound, setEastBound] = useState(props.eastBound);
@@ -209,58 +179,40 @@ export default function RenderDraggable(props) {
                 //console.log('state has not changed here in column 2');
               } else {
                 dispatch(changeColumn(2, props.position, props.id))
-                //setColumn(2);
+                setColumn(2)
+                setPosition(1)
                 //console.log('res is now in column 2');
               }
-              //setColumn(2);
             } else if (gestureState.moveX < oneColumn)  {
               if (column === 1) {
                 //console.log('state has not changed here in column 1')
               } else {
                 //console.log('res is now in column 1');
                 dispatch(changeColumn(1, props.position, props.id));
-                //setColumn(1);
+                setColumn(1)
+                setPosition(0)
               }
-              // setColumn(1);
             } else {
               if (column === 3) {
                 //console.log('state has not changed here in column 3')
               } else {
                 //console.log('res is now in column 3');
                 dispatch(changeColumn(3, props.position, props.id));
-                //setColumn(3);
+                setColumn(3)
+                setPosition(2)
               }
-              //setColumn(3);
             }
-        		// console.log(
-          //     'onPanResponderMove [event, gestureState]: ', 
-          //     event, 
-          //     gestureState
-          //   )
         	}
         }
       ),
       onPanResponderRelease: (event, gestureState) => {
         console.log('onPanResponderRelease gestureState: ', gestureState);
-        // console.log('event.TouchHistory.touchBank.startPageX:', event.touchHistory.touchBank[0].startPageX)
-        // console.log('event.TouchHistory.touchBank.currentPageX:', event.touchHistory.touchBank[0].currentPageX)
-        // console.log('event.TouchHistory.touchBank.startPageY:', event.touchHistory.touchBank[0].startPageY)
-        // console.log('event.TouchHistory.touchBank.currentPageY:', event.touchHistory.touchBank[0].currentPageY)
-        // const bank = event.touchHistory.touchBank[0];
-        // const horizontalTravel = bank.currentPageX - bank.startPageX;
-        // const verticalTravel = bank.currentPageY - bank.startPageY;
-
-        // const horizontalTravel = event.touchHistory.touchBank[0].currentPageX - event.touchHistory.touchBank[0].startPageX;
-        // const verticalTravel = event.touchHistory.touchBank[0].currentPageY - event.touchHistory.touchBank[0].startPageY;
-
         const eastBoundCond = gestureState.moveX < eastBound;
         const southBoundCond = gestureState.moveY < southBound;
         const westBoundCond = gestureState.moveX > westBound;
         const northBoundCond = gestureState.moveY > northBound && southBoundCond;
 
-
         console.log('gestureState.moveX: ', gestureState.moveX)
-
         console.log('eastBoundCond: ', eastBoundCond);
         console.log('southBoundCond: ', southBoundCond);
         console.log('westBoundCond: ', westBoundCond);
@@ -322,7 +274,7 @@ export default function RenderDraggable(props) {
         	styles.circle
         ]}
       >
-        <Text style={styles.text}>{props.position}</Text>
+        <Text style={styles.text}>{props.id}</Text>
       </Animated.View>
   );
 }

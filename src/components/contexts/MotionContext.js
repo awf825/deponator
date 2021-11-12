@@ -16,9 +16,18 @@ export const motionReducer = (state, action) => {
 	switch (action.type) {
 		case "RCNCL":
 			var grid = action.payload.gridState.grid;
-			var idxOfMoving = grid.findIndex(x => (x['id'] === action.payload.id));
-			var toMove = grid[idxOfMoving+action.payload.delta];
-			//debugger
+			var d = action.payload.delta;
+			var p = action.payload.position;
+			var id = action.payload.id;
+			// gather the item in the grid that meets the conditions:
+			// it matches the position of the square I'm moving into (position + (1 or -1))
+			// it is not the item I am currently moving 
+			var toMove = grid.find(x => (
+					(x['pos'] === p+d)
+					&&
+					(x['id'] !== id)
+				)
+			)
 			var motionArray = [
 				{
 					'id': action.payload.id,
@@ -26,7 +35,8 @@ export const motionReducer = (state, action) => {
 				},
 				{
 					'id': toMove['id'],
-					'pos': toMove['pos']
+					'pos': toMove['pos'],
+					'new': toMove['pos']-d
 				}
 			]
 			return {

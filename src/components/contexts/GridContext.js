@@ -14,12 +14,10 @@ export const changeColumn = (col, pos, id) => ({
   } 
 })
 
-// export const reconcile = (delta) => ({
-//   type: "RECONCILE",
-//   payload: {
-//     delta: delta
-//   } 
-// })
+export const togglePassive = () => ({
+  type: 'PSV',
+  payload: {}
+})
 
 export const GridContext = React.createContext({});
 
@@ -42,13 +40,8 @@ export const gridReducer = (state, action) => {
         ...state,
         grid: vg
       }
-    // case "RECONCILE":
-    //   console.log('[delta, state.grid]: ', action.payload.delta, state.grid)
-    //   return {
-    //     ...state,
-    //     moving: true,
-    //     delta: action.payload.delta
-    //   };
+    case "PSV":
+      console.log('are we there yet?')
     default:
       return state;
   }
