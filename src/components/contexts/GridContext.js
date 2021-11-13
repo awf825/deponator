@@ -14,9 +14,12 @@ export const changeColumn = (col, pos, id) => ({
   } 
 })
 
-export const togglePassive = () => ({
+export const togglePassive = (newPos, id) => ({
   type: 'PSV',
-  payload: {}
+  payload: {
+    id: id,
+    newPos: newPos
+  }
 })
 
 export const GridContext = React.createContext({});
@@ -41,7 +44,14 @@ export const gridReducer = (state, action) => {
         grid: vg
       }
     case "PSV":
-      console.log('are we there yet?')
+      const vg2 = state.grid;
+      const idx2 = state.grid.findIndex(gg => gg['id'] === action.payload.id);
+      vg2[idx2].pos = action.payload.newPos;
+
+      return {
+        ...state,
+        grid: vg2
+      }
     default:
       return state;
   }

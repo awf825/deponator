@@ -98,7 +98,7 @@ export default function RenderDraggable(props) {
       var mL = motionState.movingList;
       if (mL && (mL.length > 0)) {
         if (mL[1]['id'] === props.id) {
-          console.log('I match motion to be: ', mL, props.id)
+          // console.log('I match motion to be: ', mL, props.id)
           const delta = (mL[0]['pos'] - mL[1]['pos'])
           //debugger
           // TODO for full grid motion logic to move to next row 
@@ -109,7 +109,7 @@ export default function RenderDraggable(props) {
           ).start(() => {
             setPosition(motionState.movingList[1]['new'])
             setColumn(motionState.movingList[1]['new']+1)
-            dispatch(togglePassive())
+            dispatch(togglePassive(motionState.movingList[1]['new'], props.id))
           })
         } 
       }
@@ -139,15 +139,49 @@ export default function RenderDraggable(props) {
       // onMoveShouldSetPanResponderCapture: () => console.log('onMoveShouldSetPanResponderCapture')
       //The handler will trigger when the element is moving. 
       //We need to set the animated values to perform the dragging correctly.
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: pan.x._value,
-          y: pan.y._value
-        });
-        pan.setValue({
-          x: 0,
-          y: 0
-        })
+      onPanResponderGrant: (event, gestureState) => {
+        console.log(
+          '[pan.x._value, pan.y._value, gestureState.x0, gestureState.moveX, gestureState.dx] @ onPanResponderGrant:', 
+            pan.x._value, pan.y._value, gestureState.x0, gestureState.moveX, gestureState.dx)
+        // initial column = props.position+1
+        // new column = column
+        // (initial column - new column)*oneColumnLength = new x offset  
+        // var initialCol = props.column;
+        // var newOffset = ((column - initialCol)*(oneColumn))
+        // console.log('initialCol:', initialCol);
+        // console.log('column:', column);
+        // console.log('newOffset:', newOffset);
+
+        // if (gestureState.x0 < oneColumn) {
+        //   pan.setOffset({
+        //     x: pan.x._value,
+        //     y: 0
+        //   });
+        // } else {
+        //   pan.setOffset({
+        //     x: pan.x._value,
+        //     y: 0
+        //   });
+        // }
+        //   console.log('SETITOFF')
+        //   pan.setOffset({
+        //     x: -700,
+        //     y: 0
+        //   })
+        // } else {
+        // pan.setOffset({
+        //   x: newOffset,
+        //   y: 0
+        // });
+        //   pan.setValue({
+        //     x: 0,
+        //     y: 0
+        //   })
+        // } 
+        // pan.setValue({
+        //   x: 0,
+        //   y: 0
+        // })
       },
       onPanResponderMove: Animated.event(
         [
@@ -202,21 +236,26 @@ export default function RenderDraggable(props) {
                 setPosition(2)
               }
             }
+            debugger
+            pan.setOffset({
+              x: (column-props.column)*(oneColumn),
+              y: 0
+            })
         	}
         }
       ),
       onPanResponderRelease: (event, gestureState) => {
-        console.log('onPanResponderRelease gestureState: ', gestureState);
+        // console.log('onPanResponderRelease gestureState: ', gestureState);
         const eastBoundCond = gestureState.moveX < eastBound;
         const southBoundCond = gestureState.moveY < southBound;
         const westBoundCond = gestureState.moveX > westBound;
         const northBoundCond = gestureState.moveY > northBound && southBoundCond;
 
-        console.log('gestureState.moveX: ', gestureState.moveX)
-        console.log('eastBoundCond: ', eastBoundCond);
-        console.log('southBoundCond: ', southBoundCond);
-        console.log('westBoundCond: ', westBoundCond);
-        console.log('northBoundCond: ', northBoundCond);
+        // console.log('gestureState.moveX: ', gestureState.moveX)
+        // console.log('eastBoundCond: ', eastBoundCond);
+        // console.log('southBoundCond: ', southBoundCond);
+        // console.log('westBoundCond: ', westBoundCond);
+        // console.log('northBoundCond: ', northBoundCond);
 
         if (eastBoundCond && southBoundCond && northBoundCond && westBoundCond) {
           Animated.spring(
@@ -225,15 +264,30 @@ export default function RenderDraggable(props) {
           ).start();
         } else {
           if (gestureState.dx < 0 && southBoundCond) {
+            //debugger
+            console.log(
+              '[pan.x._value, pan.x._offset, pan.y._value, pan.x._offset, gestureState.x0, gestureState.moveX, gestureState.dx] @ onPanResponderRELEASE:', 
+              pan.x._value, pan.x._offset, pan.y._value, pan.y._offset, gestureState.x0, gestureState.moveX, gestureState.dx)
+              //console.log('gestureState.x0-oneColumn:', gestureState.x0-oneColumn)
             Animated.spring(
               pan,
               { toValue: { x: -(oneColumn), y: 0 } }    
-            ).start();
-          } else if (gestureState.dx > props.width && southBoundCond) {
+            ).start(() => {
+              // pan.setValue({
+              //   x: pan.x._value-oneColumn,
+              //   y: 0
+              // })
+            });
+          } else if (gestureState.dx > oneColumn && southBoundCond) {
             Animated.spring(
               pan,
-              { toValue: { x: props.width, y: 0 } }    
-            ).start();           
+              { toValue: { x: oneColumn, y: 0 } }    
+            ).start(() => {
+              // pan.setValue({
+              //   x: pan.x._value+oneColumn,
+              //   y: 0
+              // })  
+            });         
           }
           // find out which square we landed in !!!!!!!
             // if horizontalTravel < 0 && southBoundCond, WE WENT LEFT
