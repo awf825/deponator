@@ -114,6 +114,15 @@ export default function RenderDraggable(props) {
         } 
       }
   }, [motionState])
+
+  // useEffect(() => {
+  //   debugger
+  //   var offset = (column - props.column)*oneColumn 
+  //   pan.setOffset({
+  //     x: offset,
+  //     y: 0
+  //   })
+  // }, [column])
   // the cardinal directions serve as the left, top, right, and 
   // bottom boundaries of each grid square
   const [eastBound, setEastBound] = useState(props.eastBound);
@@ -140,9 +149,10 @@ export default function RenderDraggable(props) {
       //The handler will trigger when the element is moving. 
       //We need to set the animated values to perform the dragging correctly.
       onPanResponderGrant: (event, gestureState) => {
-        console.log(
-          '[pan.x._value, pan.y._value, gestureState.x0, gestureState.moveX, gestureState.dx] @ onPanResponderGrant:', 
-            pan.x._value, pan.y._value, gestureState.x0, gestureState.moveX, gestureState.dx)
+        var initialColumn = (props.column-1)*oneColumn
+        console.log('pan.x: @ onPanResponderGrant', pan.x)
+        console.log('gestureState @ onPanResponderGrant:', gestureState)
+        console.log('initial column @ onPanResponderGrant:', initialColumn);
         // initial column = props.position+1
         // new column = column
         // (initial column - new column)*oneColumnLength = new x offset  
@@ -158,10 +168,11 @@ export default function RenderDraggable(props) {
         //     y: 0
         //   });
         // } else {
-        //   pan.setOffset({
-        //     x: pan.x._value,
-        //     y: 0
-        //   });
+          pan.setOffset({
+            x: pan.x._value,
+            y: 0
+          });
+
         // }
         //   console.log('SETITOFF')
         //   pan.setOffset({
@@ -236,11 +247,11 @@ export default function RenderDraggable(props) {
                 setPosition(2)
               }
             }
-            debugger
-            pan.setOffset({
-              x: (column-props.column)*(oneColumn),
-              y: 0
-            })
+            // debugger
+            // pan.setOffset({
+            //   x: (column-props.column)*(oneColumn),
+            //   y: 0
+            // })
         	}
         }
       ),
@@ -273,10 +284,7 @@ export default function RenderDraggable(props) {
               pan,
               { toValue: { x: -(oneColumn), y: 0 } }    
             ).start(() => {
-              // pan.setValue({
-              //   x: pan.x._value-oneColumn,
-              //   y: 0
-              // })
+
             });
           } else if (gestureState.dx > oneColumn && southBoundCond) {
             Animated.spring(
