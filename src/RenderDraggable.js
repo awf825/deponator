@@ -75,6 +75,7 @@ export default function RenderDraggable(props) {
   const [outgoingPosition, setOutgoingPosition] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
   const [motionState, dispatchMotion] = useContext(MotionContext);
+  const offset = useRef({ numberOfColumns: 0 });
   const oneColumn = (props.width / 3);
   const oneRow = (props.height / 3);
 
@@ -102,6 +103,7 @@ export default function RenderDraggable(props) {
           const delta = (mL[0]['pos'] - mL[1]['pos'])
           //debugger
           // TODO for full grid motion logic to move to next row 
+          offset.current.numberOfColumns += delta
           const vector = (oneColumn*delta)
           Animated.spring(
             pan,
@@ -144,55 +146,24 @@ export default function RenderDraggable(props) {
       // onStartShouldSetPanResponder: () => console.log('onStartShouldSetPanResponder', props.id)
       // onStartShouldSetPanResponderCapture: () => console.log('onStartShouldSetPanResponderCapture', props.id)
       onMoveShouldSetPanResponder: () => true,
-
       // onMoveShouldSetPanResponderCapture: () => console.log('onMoveShouldSetPanResponderCapture')
-      //The handler will trigger when the element is moving. 
-      //We need to set the animated values to perform the dragging correctly.
+      // The handler will trigger when the element is moving. 
+      // We need to set the animated values to perform the dragging correctly.
       onPanResponderGrant: (event, gestureState) => {
-        var initialColumn = (props.column-1)*oneColumn
-        console.log('pan.x: @ onPanResponderGrant', pan.x)
-        console.log('gestureState @ onPanResponderGrant:', gestureState)
-        console.log('initial column @ onPanResponderGrant:', initialColumn);
-        // initial column = props.position+1
-        // new column = column
-        // (initial column - new column)*oneColumnLength = new x offset  
-        // var initialCol = props.column;
-        // var newOffset = ((column - initialCol)*(oneColumn))
-        // console.log('initialCol:', initialCol);
-        // console.log('column:', column);
-        // console.log('newOffset:', newOffset);
+        // console.log('pan.x: @ onPanResponderGrant', pan.x)
+        //console.log('gestureState @ onPanResponderGrant:', gestureState)
+        //console.log('initial column @ onPanResponderGrant:', initialColumn);
 
-        // if (gestureState.x0 < oneColumn) {
-        //   pan.setOffset({
-        //     x: pan.x._value,
-        //     y: 0
-        //   });
-        // } else {
-          pan.setOffset({
-            x: pan.x._value,
-            y: 0
-          });
-
-        // }
-        //   console.log('SETITOFF')
-        //   pan.setOffset({
-        //     x: -700,
-        //     y: 0
-        //   })
-        // } else {
-        // pan.setOffset({
-        //   x: newOffset,
-        //   y: 0
-        // });
-        //   pan.setValue({
-        //     x: 0,
-        //     y: 0
-        //   })
-        // } 
-        // pan.setValue({
-        //   x: 0,
-        //   y: 0
-        // })
+        /* 
+            Offset will always be the absolute value of the pan value set in onPanResponderRelease
+            multiplied by the number of columns traversed. Offset holds negative values yes, but
+            < or > than 0 is already handled by the offset ref hook. 
+        */
+        const offsetX = ((offset.current.numberOfColumns)*Math.abs(pan.x._value))
+        pan.setOffset({
+          x: offsetX,
+          y: 0
+        });
       },
       onPanResponderMove: Animated.event(
         [
@@ -220,82 +191,74 @@ export default function RenderDraggable(props) {
             // if x is GREATER THAN 2/3 OF WIDTH, it is in column 3
             // if y is GREATER THAN 2/3 OF HEIGHT, it is in row 3
             if ((gestureState.moveX >= oneColumn) && (gestureState.moveX < (oneColumn*2))) {
-              if (column === 2) {
-                //console.log('state has not changed here in column 2');
-              } else {
-                dispatch(changeColumn(2, props.position, props.id))
-                setColumn(2)
-                setPosition(1)
-                //console.log('res is now in column 2');
-              }
+              dispatch(changeColumn(2, props.position, props.id))
+              //setColumn(2)
+              setPosition(1)
             } else if (gestureState.moveX < oneColumn)  {
-              if (column === 1) {
-                //console.log('state has not changed here in column 1')
-              } else {
-                //console.log('res is now in column 1');
-                dispatch(changeColumn(1, props.position, props.id));
-                setColumn(1)
-                setPosition(0)
-              }
+              dispatch(changeColumn(1, props.position, props.id));
+              //setColumn(1)
+              setPosition(0)
+              
             } else {
-              if (column === 3) {
-                //console.log('state has not changed here in column 3')
-              } else {
-                //console.log('res is now in column 3');
-                dispatch(changeColumn(3, props.position, props.id));
-                setColumn(3)
-                setPosition(2)
-              }
+              dispatch(changeColumn(3, props.position, props.id));
+              //setColumn(3)
+              setPosition(2)
             }
-            // debugger
-            // pan.setOffset({
-            //   x: (column-props.column)*(oneColumn),
-            //   y: 0
-            // })
         	}
         }
       ),
       onPanResponderRelease: (event, gestureState) => {
-        // console.log('onPanResponderRelease gestureState: ', gestureState);
         const eastBoundCond = gestureState.moveX < eastBound;
         const southBoundCond = gestureState.moveY < southBound;
         const westBoundCond = gestureState.moveX > westBound;
         const northBoundCond = gestureState.moveY > northBound && southBoundCond;
-
         // console.log('gestureState.moveX: ', gestureState.moveX)
-        // console.log('eastBoundCond: ', eastBoundCond);
-        // console.log('southBoundCond: ', southBoundCond);
-        // console.log('westBoundCond: ', westBoundCond);
-        // console.log('northBoundCond: ', northBoundCond);
-
+        console.log('eastBoundCond: ', eastBoundCond);
+        console.log('southBoundCond: ', southBoundCond);
+        console.log('westBoundCond: ', westBoundCond);
+        console.log('northBoundCond: ', northBoundCond);
+        //debugger
         if (eastBoundCond && southBoundCond && northBoundCond && westBoundCond) {
           Animated.spring(
             pan,
-            { toValue: { x: 0, y: 0 } }    
+            { 
+              toValue: { 
+                x: 0, 
+                y: 0 
+              } 
+            }    
           ).start();
         } else {
+          console.log('gestureState.dx', gestureState.dx);
+          console.log('oneColumn:', oneColumn)
           if (gestureState.dx < 0 && southBoundCond) {
             //debugger
-            console.log(
-              '[pan.x._value, pan.x._offset, pan.y._value, pan.x._offset, gestureState.x0, gestureState.moveX, gestureState.dx] @ onPanResponderRELEASE:', 
-              pan.x._value, pan.x._offset, pan.y._value, pan.y._offset, gestureState.x0, gestureState.moveX, gestureState.dx)
+            offset.current.numberOfColumns -= 1
+            // console.log(
+            //   '[pan.x._value, pan.x._offset, pan.y._value, pan.x._offset, gestureState.x0, gestureState.moveX, gestureState.dx] @ onPanResponderRELEASE:', 
+            //   pan.x._value, pan.x._offset, pan.y._value, pan.y._offset, gestureState.x0, gestureState.moveX, gestureState.dx)
               //console.log('gestureState.x0-oneColumn:', gestureState.x0-oneColumn)
             Animated.spring(
               pan,
-              { toValue: { x: -(oneColumn), y: 0 } }    
-            ).start(() => {
-
-            });
-          } else if (gestureState.dx > oneColumn && southBoundCond) {
+              { 
+                toValue: { 
+                  x: -(oneColumn), 
+                  y: 0 
+                } 
+              }    
+            ).start();
+          } else if ((gestureState.dx > (oneColumn-CIRCLE_RADIUS)) && southBoundCond) {
+            console.log('((gestureState.dx > (oneColumn-CIRCLE_RADIUS)) && southBoundCond)')
+            offset.current.numberOfColumns += 1
             Animated.spring(
               pan,
-              { toValue: { x: oneColumn, y: 0 } }    
-            ).start(() => {
-              // pan.setValue({
-              //   x: pan.x._value+oneColumn,
-              //   y: 0
-              // })  
-            });         
+              { 
+                toValue: { 
+                  x: oneColumn, 
+                  y: 0 
+                }
+              }    
+            ).start();   
           }
           // find out which square we landed in !!!!!!!
             // if horizontalTravel < 0 && southBoundCond, WE WENT LEFT
