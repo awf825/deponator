@@ -34,12 +34,17 @@ import React, {
 import Amplify from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react-native'
 import { API, graphqlOperation } from '@aws-amplify/api';
+import { Auth } from '@aws-amplify/auth';
 import awsmobile from './aws-exports';
 Amplify.configure({
   ...awsmobile,
   Analytics: {
     disabled: true,
   },
+  graphql_headers: async () => {
+    const currentSession = await Auth.currentSession();
+    return { Authorization: currentSession.getIdToken().getJwtToken() };
+  }
 });
 
 /* IMPORTED COMPONENTS */
@@ -136,10 +141,10 @@ function App() {
                   }
                   const calcTop = (0+(dy*100))
                   const calcLeft = (0+(dx*w))
-                  console.log('book:', b)
+                  // console.log('book:', b)
 
-                  console.log('calcTop: ', calcTop);
-                  console.log('calcLeft: ', calcLeft);
+                  // console.log('calcTop: ', calcTop);
+                  // console.log('calcLeft: ', calcLeft);
 
                   const s = StyleSheet.create({
                     gridSquare: {

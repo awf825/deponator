@@ -33,6 +33,7 @@ export const gridReducer = (state, action) => {
       };
       // state.grid.push(action.payload)
     case "TOG_COL":
+      console.log('TOG_COL');
       // I NEED TO CHANGE POSITION OF RESOURCE BY ID TO COL - 1 (FOR NOW, SINCE I ONLY HAVE 3 CELLS)
       const vg = state.grid;
       const newPos = (action.payload.col - 1);

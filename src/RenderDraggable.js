@@ -88,7 +88,15 @@ export default function RenderDraggable(props) {
 
   useEffect(() => {
     const actionObj = gridState.grid.find(x => (x['id'] === props.id))
+
+    console.log('========================')
+    console.log('id:', actionObj.id)
+    console.log('pos:', actionObj.pos)
+    console.log('position state:', position)
+    console.log('========================')
+    
     if (actionObj && (actionObj.pos !== position)) {
+      console.log('(actionObj && (actionObj.pos !== position))');
       const delta = (actionObj.pos - position);
       dispatchMotion(reconcile(props.id, delta, position, gridState))
       return;
@@ -99,12 +107,15 @@ export default function RenderDraggable(props) {
       var mL = motionState.movingList;
       if (mL && (mL.length > 0)) {
         if (mL[1]['id'] === props.id) {
-          // console.log('I match motion to be: ', mL, props.id)
+          console.log('I match motion to be: ', mL, props.id)
           const delta = (mL[0]['pos'] - mL[1]['pos'])
           //debugger
           // TODO for full grid motion logic to move to next row 
           offset.current.numberOfColumns += delta
-          const vector = (oneColumn*delta)
+          console.log('delta:', delta)
+          const vector = (oneColumn*offset.current.numberOfColumns)
+          console.log('offset.current:', offset.current);
+          console.log('vector:', vector);
           Animated.spring(
             pan,
             { toValue: { x: vector, y: 0 } }    
@@ -229,8 +240,8 @@ export default function RenderDraggable(props) {
             }    
           ).start();
         } else {
-          console.log('gestureState.dx', gestureState.dx);
-          console.log('oneColumn:', oneColumn)
+          // console.log('gestureState.dx', gestureState.dx);
+          // console.log('oneColumn:', oneColumn)
           if (gestureState.dx < 0 && southBoundCond) {
             //debugger
             offset.current.numberOfColumns -= 1

@@ -15,6 +15,7 @@ export const MotionContext = React.createContext({});
 export const motionReducer = (state, action) => {
 	switch (action.type) {
 		case "RCNCL":
+			console.log("RCNCL")
 			var grid = action.payload.gridState.grid;
 			var d = action.payload.delta;
 			var p = action.payload.position;
