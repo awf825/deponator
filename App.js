@@ -78,12 +78,14 @@ let styles = StyleSheet.create({
 function App() {
   // gather user resources
   const [books, setBooks] = useState([]);
+  const [whichView, setWhichView] = useState('CASE');
   // boardView built with resources and passed as children to main view
   const [boardView, setBoardView] = useState(null);
   // use context and reducer hooks to build a virtual rep of the grid state
   const [gridState, dispatch] = useReducer(
     gridReducer, 
     { 
+      whichView: 'CASE',
       grid: []
     }
   )
@@ -99,6 +101,7 @@ function App() {
   useEffect(() => {
     const getResult = async () => {
       const books = await API.graphql(graphqlOperation(ListBooks));
+      /* get all attached resources here if I have to */
       // sort books so graphql doesn't have to
       const stateOut = books.data.listBooks.items.sort((a,b) => {
         return (a.position > b.position) ? 1 : -1
@@ -178,6 +181,71 @@ function App() {
                 });
     setBoardView(newBoardView)
   }, [books])
+
+  useEffect(() => {
+    const w = Window.width / 3;
+    const h = Window.height;
+    let dx = 0;
+    let dy = 0; 
+    switch (gridState.whichView) {
+      case "CASE":
+        console.log("case view in effect")
+        const baseView = books.map((b,i) => {
+                if (i>0) {
+                  dx += 1
+                  if (i%3 === 0) {
+                    dx = 0
+                    dy += 1
+                  }
+                }
+                const calcTop = (0+(dy*100))
+                const calcLeft = (0+(dx*w))
+                // console.log('book:', b)
+
+                // console.log('calcTop: ', calcTop);
+                // console.log('calcLeft: ', calcLeft);
+
+                const s = StyleSheet.create({
+                  gridSquare: {
+                    position: 'absolute',
+                    borderColor: '#000000',
+                    top: calcTop,
+                    left: calcLeft,
+                    width: w,
+                    height: 100,
+                    borderWidth: 1
+                  }
+                });
+                return (
+                  <View style={s.gridSquare} key={i+1}>
+                    <RenderDraggable 
+                      idx={i}
+                      westBound={calcLeft}
+                      northBound={calcTop}
+                      eastBound={calcLeft+(w)}
+                      southBound={calcTop+100}
+                      width={Window.width}
+                      height={Window.height}
+                      row={dy+1}
+                      column={dx+1}
+                      id={b.id}
+                      position={b.position}
+                      // gridState={gridState}
+                    />
+                  </View>
+                )
+              });
+        setBoardView(baseView)
+        return;
+      case "DEPO":
+        console.log("depo view in effect")
+        const secondView = []
+        setBoardView(secondView)
+        return;
+      default:
+        return;
+    }
+  }, [gridState.whichView, books])
 
   
 

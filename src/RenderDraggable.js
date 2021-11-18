@@ -35,12 +35,14 @@ import {
   Text, 
   View,
   PanResponder,
-  Animated
+  Animated,
+  Pressable
 } from 'react-native';
 
 import { 
   GridContext, 
   buildGrid, 
+  toggleView,
   changeColumn,
   togglePassive
 } from "./components/contexts/GridContext";
@@ -66,6 +68,8 @@ const styles = StyleSheet.create({
       color       : '#fff'
   },
 })
+/* wrap component to give it ability to toggle state */
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 
 export default function RenderDraggable(props) {
@@ -89,11 +93,11 @@ export default function RenderDraggable(props) {
   useEffect(() => {
     const actionObj = gridState.grid.find(x => (x['id'] === props.id))
 
-    console.log('========================')
-    console.log('id:', actionObj.id)
-    console.log('pos:', actionObj.pos)
-    console.log('position state:', position)
-    console.log('========================')
+    // console.log('========================')
+    // console.log('id:', actionObj.id)
+    // console.log('pos:', actionObj.pos)
+    // console.log('position state:', position)
+    // console.log('========================')
     
     if (actionObj && (actionObj.pos !== position)) {
       console.log('(actionObj && (actionObj.pos !== position))');
@@ -301,6 +305,7 @@ export default function RenderDraggable(props) {
   ).current;
 
   return (
+    <AnimatedPressable onPress={() => dispatch(toggleView("DEPO"))}>
       <Animated.View 
         {...panResponder.panHandlers}
         style={[
@@ -312,5 +317,6 @@ export default function RenderDraggable(props) {
       >
         <Text style={styles.text}>{props.id}</Text>
       </Animated.View>
+    </AnimatedPressable>
   );
 }

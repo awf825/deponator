@@ -5,6 +5,13 @@ export const buildGrid = (payload) => ({
   payload: payload,
 });
 
+export const toggleView = (newView) => ({
+  type: "TOG_VIEW",
+  payload: {
+    newView: newView
+  }
+})
+
 export const changeColumn = (col, pos, id) => ({
   type: "TOG_COL",
   payload: {
@@ -32,8 +39,13 @@ export const gridReducer = (state, action) => {
         grid: [...state.grid, action.payload]
       };
       // state.grid.push(action.payload)
+    case "TOG_VIEW":
+      return {
+        ...state,
+        whichView: action.payload.newView
+      }
     case "TOG_COL":
-      console.log('TOG_COL');
+      //console.log('TOG_COL');
       // I NEED TO CHANGE POSITION OF RESOURCE BY ID TO COL - 1 (FOR NOW, SINCE I ONLY HAVE 3 CELLS)
       const vg = state.grid;
       const newPos = (action.payload.col - 1);
