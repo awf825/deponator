@@ -305,7 +305,8 @@ export default function RenderDraggable(props) {
   ).current;
 
   return (
-    <AnimatedPressable onPress={() => dispatch(toggleView("DEPO"))}>
+    // dispatch(toggleView("DEPO"))
+    <AnimatedPressable onPress={(evt) => dispatch(toggleView("DEPO", evt))}>
       <Animated.View 
         {...panResponder.panHandlers}
         style={[

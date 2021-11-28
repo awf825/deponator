@@ -130,6 +130,7 @@ function App() {
   */
 
   useEffect(() => {
+    console.log('books at second effect:', books)
     const w = Window.width / 3;
     const h = Window.height;
     let dx = 0;

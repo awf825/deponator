@@ -6,12 +6,27 @@ export const getBook = /* GraphQL */ `
     getBook(id: $id) {
       id
       title
-      author
+      position
+      depos {
+        items {
+          id
+          bookID
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        nextToken
+        startedAt
+      }
+      createdAt
+      updatedAt
       _version
       _deleted
       _lastChangedAt
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -25,12 +40,16 @@ export const listBooks = /* GraphQL */ `
       items {
         id
         title
-        author
+        position
+        depos {
+          nextToken
+          startedAt
+        }
+        createdAt
+        updatedAt
         _version
         _deleted
         _lastChangedAt
-        createdAt
-        updatedAt
       }
       nextToken
       startedAt
@@ -53,12 +72,117 @@ export const syncBooks = /* GraphQL */ `
       items {
         id
         title
-        author
+        position
+        depos {
+          nextToken
+          startedAt
+        }
+        createdAt
+        updatedAt
         _version
         _deleted
         _lastChangedAt
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const getDepo = /* GraphQL */ `
+  query GetDepo($id: ID!) {
+    getDepo(id: $id) {
+      id
+      bookID
+      title
+      position
+      book {
+        id
+        title
+        position
+        depos {
+          nextToken
+          startedAt
+        }
         createdAt
         updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+    }
+  }
+`;
+export const listDepos = /* GraphQL */ `
+  query ListDepos(
+    $filter: ModelDepoFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listDepos(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        bookID
+        title
+        position
+        book {
+          id
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const syncDepos = /* GraphQL */ `
+  query SyncDepos(
+    $filter: ModelDepoFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncDepos(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        bookID
+        title
+        position
+        book {
+          id
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
       }
       nextToken
       startedAt

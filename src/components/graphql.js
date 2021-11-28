@@ -12,7 +12,16 @@ export const ListBooks = `
 query {
   listBooks {
     items {
-      id title position
+      id 
+      title 
+      position 
+      depos {
+        items {
+          id 
+          title
+          position
+        }
+      }
     }
   }
 }

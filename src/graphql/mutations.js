@@ -9,12 +9,27 @@ export const createBook = /* GraphQL */ `
     createBook(input: $input, condition: $condition) {
       id
       title
-      author
+      position
+      depos {
+        items {
+          id
+          bookID
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        nextToken
+        startedAt
+      }
+      createdAt
+      updatedAt
       _version
       _deleted
       _lastChangedAt
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -26,12 +41,27 @@ export const updateBook = /* GraphQL */ `
     updateBook(input: $input, condition: $condition) {
       id
       title
-      author
+      position
+      depos {
+        items {
+          id
+          bookID
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        nextToken
+        startedAt
+      }
+      createdAt
+      updatedAt
       _version
       _deleted
       _lastChangedAt
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -43,12 +73,123 @@ export const deleteBook = /* GraphQL */ `
     deleteBook(input: $input, condition: $condition) {
       id
       title
-      author
+      position
+      depos {
+        items {
+          id
+          bookID
+          title
+          position
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+        }
+        nextToken
+        startedAt
+      }
+      createdAt
+      updatedAt
       _version
       _deleted
       _lastChangedAt
+    }
+  }
+`;
+export const createDepo = /* GraphQL */ `
+  mutation CreateDepo(
+    $input: CreateDepoInput!
+    $condition: ModelDepoConditionInput
+  ) {
+    createDepo(input: $input, condition: $condition) {
+      id
+      bookID
+      title
+      position
+      book {
+        id
+        title
+        position
+        depos {
+          nextToken
+          startedAt
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+    }
+  }
+`;
+export const updateDepo = /* GraphQL */ `
+  mutation UpdateDepo(
+    $input: UpdateDepoInput!
+    $condition: ModelDepoConditionInput
+  ) {
+    updateDepo(input: $input, condition: $condition) {
+      id
+      bookID
+      title
+      position
+      book {
+        id
+        title
+        position
+        depos {
+          nextToken
+          startedAt
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+    }
+  }
+`;
+export const deleteDepo = /* GraphQL */ `
+  mutation DeleteDepo(
+    $input: DeleteDepoInput!
+    $condition: ModelDepoConditionInput
+  ) {
+    deleteDepo(input: $input, condition: $condition) {
+      id
+      bookID
+      title
+      position
+      book {
+        id
+        title
+        position
+        depos {
+          nextToken
+          startedAt
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
     }
   }
 `;

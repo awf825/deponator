@@ -14,5 +14,13 @@ type Book @model @auth(rules: [{allow: public}]) {
   id: ID!
   title: String!
   position: Int
+  depos: [Depo] @hasMany(indexName: "byBook", fields: ["id"])
 }
- 
+
+type Depo @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  bookID: ID! @index(name: "byBook", sortKeyFields: ["position"])
+  title: String!
+  position: Int
+  book: Book @belongsTo(fields: ["bookID"])
+}
