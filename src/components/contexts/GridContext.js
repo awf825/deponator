@@ -5,11 +5,12 @@ export const buildGrid = (payload) => ({
   payload: payload,
 });
 
-export const toggleView = (newView, event) => ({
+export const toggleView = (newView, event, id) => ({
   type: "TOG_VIEW",
   payload: {
     newView: newView,
-    event: event
+    event: event,
+    id: id
   }
 })
 
@@ -41,10 +42,10 @@ export const gridReducer = (state, action) => {
       };
       // state.grid.push(action.payload)
     case "TOG_VIEW":
-      // debugger
       return {
         ...state,
-        whichView: action.payload.newView
+        whichView: action.payload.newView,
+        whichClick: action.payload.id
       }
     case "TOG_COL":
       //console.log('TOG_COL');

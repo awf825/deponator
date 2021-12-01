@@ -304,9 +304,18 @@ export default function RenderDraggable(props) {
     })
   ).current;
 
+  const stopPropagationAndDispatch = (evt) => {
+    // debugger
+    // console.log('')
+    // evt.stopPropagation();
+    // evt.preventDefault();
+    // dispatch(toggleView("DEPO", evt, props.id));
+    // console.log('stopPropagationAndDispatch')
+  }
+
   return (
-    // dispatch(toggleView("DEPO"))
-    <AnimatedPressable onPress={(evt) => dispatch(toggleView("DEPO", evt))}>
+    // <AnimatedPressable onPress={(evt) => dispatch(toggleView("DEPO", evt, props.id))}>
+    <AnimatedPressable onPress={(e) => stopPropagationAndDispatch(e)}>
       <Animated.View 
         {...panResponder.panHandlers}
         style={[

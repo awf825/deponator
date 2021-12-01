@@ -86,6 +86,7 @@ function App() {
     gridReducer, 
     { 
       whichView: 'CASE',
+      whichClick: '',
       grid: []
     }
   )
@@ -239,8 +240,52 @@ function App() {
         setBoardView(baseView)
         return;
       case "DEPO":
-        console.log("depo view in effect")
-        const secondView = []
+        const idx = books.findIndex(b => b['id'] === gridState.whichClick);
+        const secondView = books[idx].depos.items.map((b,i) => {
+                          if (i>0) {
+                  dx += 1
+                  if (i%3 === 0) {
+                    dx = 0
+                    dy += 1
+                  }
+                }
+                const calcTop = (0+(dy*100))
+                const calcLeft = (0+(dx*w))
+                // console.log('book:', b)
+
+                // console.log('calcTop: ', calcTop);
+                // console.log('calcLeft: ', calcLeft);
+
+                const s = StyleSheet.create({
+                  gridSquare: {
+                    position: 'absolute',
+                    borderColor: '#000000',
+                    top: calcTop,
+                    left: calcLeft,
+                    width: w,
+                    height: 100,
+                    borderWidth: 1
+                  }
+                });
+                return (
+                  <View style={s.gridSquare} key={i+1}>
+                    <RenderDraggable 
+                      idx={i}
+                      westBound={calcLeft}
+                      northBound={calcTop}
+                      eastBound={calcLeft+(w)}
+                      southBound={calcTop+100}
+                      width={Window.width}
+                      height={Window.height}
+                      row={dy+1}
+                      column={dx+1}
+                      id={b.id}
+                      position={b.position}
+                      // gridState={gridState}
+                    />
+                  </View>
+                )
+        });
         setBoardView(secondView)
         return;
       default:
