@@ -74,9 +74,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function RenderDraggable(props) {
   const [position, setPosition] = useState(props.position);
-  const [delta, setDelta] = useState(null);
-  const [moving, setIsMoving] = useState(false);
-  const [outgoingPosition, setOutgoingPosition] = useState(null);
   const [gridState, dispatch] = useContext(GridContext);
   const [motionState, dispatchMotion] = useContext(MotionContext);
   const offset = useRef({ numberOfColumns: 0 });
@@ -84,41 +81,18 @@ export default function RenderDraggable(props) {
   const oneRow = (props.height / 3);
 
   useEffect(() => {
-    var virtualGridSquare = {};
-    virtualGridSquare['id'] = props.id;
-    virtualGridSquare['pos'] = props.position;
-    dispatch(buildGrid(virtualGridSquare))
-  }, [props])
-
-  useEffect(() => {
-    const actionObj = gridState.grid.find(x => (x['id'] === props.id))
-
-    // console.log('========================')
-    // console.log('id:', actionObj.id)
-    // console.log('pos:', actionObj.pos)
-    // console.log('position state:', position)
-    // console.log('========================')
-    
-    if (actionObj && (actionObj.pos !== position)) {
-      console.log('(actionObj && (actionObj.pos !== position))');
-      const delta = (actionObj.pos - position);
-      dispatchMotion(reconcile(props.id, delta, position, gridState))
-      return;
-    }
-  }, [gridState])
-
-  useEffect(() => {
       var mL = motionState.movingList;
       if (mL && (mL.length > 0)) {
         if (mL[1]['id'] === props.id) {
+          //debugger
           console.log('I match motion to be: ', mL, props.id)
           const delta = (mL[0]['pos'] - mL[1]['pos'])
           //debugger
           // TODO for full grid motion logic to move to next row 
-          offset.current.numberOfColumns += delta
+          //offset.current.numberOfColumns += delta
           console.log('delta:', delta)
-          const vector = (oneColumn*offset.current.numberOfColumns)
-          console.log('offset.current:', offset.current);
+          const vector = (oneColumn*delta)
+          // console.log('offset.current:', offset.current);
           console.log('vector:', vector);
           Animated.spring(
             pan,
@@ -147,7 +121,6 @@ export default function RenderDraggable(props) {
   const [westBound, setWestBound] = useState(props.westBound);
   const [northBound, setNorthBound] = useState(props.northBound);
   const [column, setColumn] = useState(props.column);
-  const [row, setRow] = useState(props.row);
 
   // https://reactjs.org/docs/hooks-reference.html#useref
   // Create an instance of Animated.ValueXY. This component will take care of interpolating X and Y values. We will 
@@ -188,6 +161,11 @@ export default function RenderDraggable(props) {
         {
         	useNativeDriver: true,
         	listener: (event, gestureState) => {
+            console.log('oneColumn: ', oneColumn)
+            console.log('gestureState.dx: ', gestureState.dx)
+            //console.log('gestureState.moveX: ', gestureState.moveX)
+            
+
             // I may not need the cardinal dir bounds, but, on the fly, if I have 
             // TWO grid resources with the same position, I can have the reducer 
             // method act accordingly and bounce the unheld res
@@ -205,20 +183,15 @@ export default function RenderDraggable(props) {
 
             // if x is GREATER THAN 2/3 OF WIDTH, it is in column 3
             // if y is GREATER THAN 2/3 OF HEIGHT, it is in row 3
-            if ((gestureState.moveX >= oneColumn) && (gestureState.moveX < (oneColumn*2))) {
-              dispatch(changeColumn(2, props.position, props.id))
-              //setColumn(2)
-              setPosition(1)
-            } else if (gestureState.moveX < oneColumn)  {
-              dispatch(changeColumn(1, props.position, props.id));
-              //setColumn(1)
-              setPosition(0)
-              
-            } else {
-              dispatch(changeColumn(3, props.position, props.id));
-              //setColumn(3)
-              setPosition(2)
-            }
+            if ((gestureState.dx < 0) && (gestureState.dx > (-oneColumn))) {
+              console.log('MOVING LEFT')
+              //console.log('gridState: ', gridState)
+              dispatchMotion(reconcile(props.id, -1, position, gridState))
+            } else if (gestureState.dx >= oneColumn)  {
+              // console.log('gestureState.moveX: ', gestureState.moveX)
+              console.log('MOVING RIGHT')
+              dispatchMotion(reconcile(props.id, 1, position, gridState))
+            }              
         	}
         }
       ),
@@ -227,12 +200,6 @@ export default function RenderDraggable(props) {
         const southBoundCond = gestureState.moveY < southBound;
         const westBoundCond = gestureState.moveX > westBound;
         const northBoundCond = gestureState.moveY > northBound && southBoundCond;
-        // console.log('gestureState.moveX: ', gestureState.moveX)
-        console.log('eastBoundCond: ', eastBoundCond);
-        console.log('southBoundCond: ', southBoundCond);
-        console.log('westBoundCond: ', westBoundCond);
-        console.log('northBoundCond: ', northBoundCond);
-        //debugger
         if (eastBoundCond && southBoundCond && northBoundCond && westBoundCond) {
           Animated.spring(
             pan,
@@ -244,8 +211,10 @@ export default function RenderDraggable(props) {
             }    
           ).start();
         } else {
-          // console.log('gestureState.dx', gestureState.dx);
           // console.log('oneColumn:', oneColumn)
+          /*
+            This if/else condition of logic is called to reconcile what column this draggable is movign to
+          */
           if (gestureState.dx < 0 && southBoundCond) {
             //debugger
             offset.current.numberOfColumns -= 1

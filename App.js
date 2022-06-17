@@ -30,28 +30,28 @@ import React, {
   useReducer
 } from 'react';
 
-/* AWS AMPLIFY */
-import Amplify from 'aws-amplify';
-import { withAuthenticator } from 'aws-amplify-react-native'
-import { API, graphqlOperation } from '@aws-amplify/api';
-import { Auth } from '@aws-amplify/auth';
-import awsmobile from './aws-exports';
-Amplify.configure({
-  ...awsmobile,
-  Analytics: {
-    disabled: true,
-  },
-  graphql_headers: async () => {
-    const currentSession = await Auth.currentSession();
-    return { Authorization: currentSession.getIdToken().getJwtToken() };
-  }
-});
+// /* AWS AMPLIFY */
+// import Amplify from 'aws-amplify';
+// import { withAuthenticator } from 'aws-amplify-react-native'
+// import { API, graphqlOperation } from '@aws-amplify/api';
+// import { Auth } from '@aws-amplify/auth';
+// import awsmobile from './aws-exports';
+// Amplify.configure({
+//   ...awsmobile,
+//   Analytics: {
+//     disabled: true,
+//   },
+//   graphql_headers: async () => {
+//     const currentSession = await Auth.currentSession();
+//     return { Authorization: currentSession.getIdToken().getJwtToken() };
+//   }
+// });
 
 /* IMPORTED COMPONENTS */
-import { ListBooks, AddBook } from './src/components/graphql.js';
+// import { ListBooks, AddBook } from './src/components/graphql.js';
 import RenderDraggable from './src/RenderDraggable.js';
 // import { Tab } from 'react-native-elements';
-import AddBooks from './src/components/AddBook.js';
+// import AddBooks from './src/components/AddBook.js';
 
 import {
   GridContext,
@@ -77,7 +77,7 @@ let styles = StyleSheet.create({
 
 function App() {
   // gather user resources
-  const [books, setBooks] = useState([]);
+  // const [books, setBooks] = useState([]);
   const [whichView, setWhichView] = useState('CASE');
   // boardView built with resources and passed as children to main view
   const [boardView, setBoardView] = useState(null);
@@ -87,7 +87,20 @@ function App() {
     { 
       whichView: 'CASE',
       whichClick: '',
-      grid: []
+      grid: [
+        {
+          "id":1,
+          "pos":1
+        },
+        {
+          "id":2,
+          "pos":2
+        },
+        {
+          "id":3,
+          "pos":3
+        }
+      ]
     }
   )
 
@@ -99,23 +112,23 @@ function App() {
 
   )
 
-  useEffect(() => {
-    const getResult = async () => {
-      const books = await API.graphql(graphqlOperation(ListBooks));
-      /* get all attached resources here if I have to */
-      // sort books so graphql doesn't have to
-      const stateOut = books.data.listBooks.items.sort((a,b) => {
-        return (a.position > b.position) ? 1 : -1
-      })
-      setBooks(stateOut);
-    };
+  // useEffect(() => {
+  //   const getResult = async () => {
+  //     const books = await API.graphql(graphqlOperation(ListBooks));
+  //     /* get all attached resources here if I have to */
+  //     // sort books so graphql doesn't have to
+  //     const stateOut = books.data.listBooks.items.sort((a,b) => {
+  //       return (a.position > b.position) ? 1 : -1
+  //     })
+  //     setBooks(stateOut);
+  //   };
 
-    try {
-      getResult();
-    } catch(err) {
-      console.log(err)
-    }
-  }, [])
+  //   try {
+  //     getResult();
+  //   } catch(err) {
+  //     console.log(err)
+  //   }
+  // }, [])
 
   /*
     In second side effect, build the boardView based on the amount of books the user has saved.
@@ -131,12 +144,15 @@ function App() {
   */
 
   useEffect(() => {
-    console.log('books at second effect:', books)
     const w = Window.width / 3;
     const h = Window.height;
     let dx = 0;
     let dy = 0; 
-    const newBoardView = books.map((b,i) => {
+    // var virtualGridSquare = {};
+    // virtualGridSquare['id'] = props.id;
+    // virtualGridSquare['pos'] = props.position;
+    // dispatch(buildGrid(virtualGridSquare))
+    const newBoardView = [1,2,3].map((b,i) => {
                   if (i>0) {
                     dx += 1
                     if (i%3 === 0) {
@@ -182,7 +198,7 @@ function App() {
                   )
                 });
     setBoardView(newBoardView)
-  }, [books])
+  }, [])
 
   useEffect(() => {
     const w = Window.width / 3;
@@ -192,7 +208,7 @@ function App() {
     switch (gridState.whichView) {
       case "CASE":
         console.log("case view in effect")
-        const baseView = books.map((b,i) => {
+        const baseView = [1,2,3].map((b,i) => {
                 if (i>0) {
                   dx += 1
                   if (i%3 === 0) {
@@ -230,8 +246,8 @@ function App() {
                       height={Window.height}
                       row={dy+1}
                       column={dx+1}
-                      id={b.id}
-                      position={b.position}
+                      id={b}
+                      position={b}
                       // gridState={gridState}
                     />
                   </View>
@@ -239,59 +255,59 @@ function App() {
               });
         setBoardView(baseView)
         return;
-      case "DEPO":
-        const idx = books.findIndex(b => b['id'] === gridState.whichClick);
-        const secondView = books[idx].depos.items.map((b,i) => {
-                          if (i>0) {
-                  dx += 1
-                  if (i%3 === 0) {
-                    dx = 0
-                    dy += 1
-                  }
-                }
-                const calcTop = (0+(dy*100))
-                const calcLeft = (0+(dx*w))
-                // console.log('book:', b)
+    //   case "DEPO":
+    //     const idx = [1,2,3].findIndex(b => b['id'] === gridState.whichClick);
+    //     const secondView = books[idx].depos.items.map((b,i) => {
+    //                       if (i>0) {
+    //               dx += 1
+    //               if (i%3 === 0) {
+    //                 dx = 0
+    //                 dy += 1
+    //               }
+    //             }
+    //             const calcTop = (0+(dy*100))
+    //             const calcLeft = (0+(dx*w))
+    //             // console.log('book:', b)
 
-                // console.log('calcTop: ', calcTop);
-                // console.log('calcLeft: ', calcLeft);
+    //             // console.log('calcTop: ', calcTop);
+    //             // console.log('calcLeft: ', calcLeft);
 
-                const s = StyleSheet.create({
-                  gridSquare: {
-                    position: 'absolute',
-                    borderColor: '#000000',
-                    top: calcTop,
-                    left: calcLeft,
-                    width: w,
-                    height: 100,
-                    borderWidth: 1
-                  }
-                });
-                return (
-                  <View style={s.gridSquare} key={i+1}>
-                    <RenderDraggable 
-                      idx={i}
-                      westBound={calcLeft}
-                      northBound={calcTop}
-                      eastBound={calcLeft+(w)}
-                      southBound={calcTop+100}
-                      width={Window.width}
-                      height={Window.height}
-                      row={dy+1}
-                      column={dx+1}
-                      id={b.id}
-                      position={b.position}
-                      // gridState={gridState}
-                    />
-                  </View>
-                )
-        });
-        setBoardView(secondView)
-        return;
-      default:
-        return;
+    //             const s = StyleSheet.create({
+    //               gridSquare: {
+    //                 position: 'absolute',
+    //                 borderColor: '#000000',
+    //                 top: calcTop,
+    //                 left: calcLeft,
+    //                 width: w,
+    //                 height: 100,
+    //                 borderWidth: 1
+    //               }
+    //             });
+    //             return (
+    //               <View style={s.gridSquare} key={i+1}>
+    //                 <RenderDraggable 
+    //                   idx={i}
+    //                   westBound={calcLeft}
+    //                   northBound={calcTop}
+    //                   eastBound={calcLeft+(w)}
+    //                   southBound={calcTop+100}
+    //                   width={Window.width}
+    //                   height={Window.height}
+    //                   row={dy+1}
+    //                   column={dx+1}
+    //                   id={b.id}
+    //                   position={b.position}
+    //                   // gridState={gridState}
+    //                 />
+    //               </View>
+    //             )
+    //     });
+    //     setBoardView(secondView)
+    //     return;
+    //   default:
+    //     return;
     }
-  }, [gridState.whichView, books])
+  }, [gridState.whichView])
 
   
 
@@ -309,4 +325,4 @@ function App() {
   );
 }
 
-export default withAuthenticator(App);
+export default App;
