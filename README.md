@@ -14,3 +14,8 @@ I think this was sorting the resources by position
 
 ## Bugs
 PanResponder seems to give up after a few rapid touches. Not completely bulletproof. Priority: High
+
+## Tips
+This should really be a good way of getting around Expo woes. Run before developing:
+
+expo client:install:ios && npm run start

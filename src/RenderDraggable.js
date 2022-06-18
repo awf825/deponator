@@ -49,6 +49,7 @@ import {
 
 import { 
   MotionContext, 
+  killMotion,
   reconcile
 } from "./components/contexts/MotionContext";
 
@@ -98,13 +99,15 @@ export default function RenderDraggable(props) {
             pan,
             { toValue: { x: vector, y: 0 } }    
           ).start(() => {
-            setPosition(motionState.movingList[1]['new'])
-            setColumn(motionState.movingList[1]['new']+1)
-            dispatch(togglePassive(motionState.movingList[1]['new'], props.id))
+            // setPosition(motionState.movingList[1]['new'])
+            // console.log('offset.current: ', offset.current.numberOfColumns += delta)
+            offset.current.numberOfColumns += delta
+            // setColumn(motionState.movingList[1]['new']+1)
+            // dispatch(togglePassive(motionState.movingList[1]['new'], props.id))
           })
         } 
       }
-  }, [motionState])
+  }, [motionState.movingList])
 
   // useEffect(() => {
   //   debugger
@@ -186,11 +189,11 @@ export default function RenderDraggable(props) {
             if ((gestureState.dx < 0) && (gestureState.dx > (-oneColumn))) {
               console.log('MOVING LEFT')
               //console.log('gridState: ', gridState)
-              dispatchMotion(reconcile(props.id, -1, position, gridState))
+              dispatchMotion(reconcile(props.id, -1, props.position+offset.current.numberOfColumns, gridState))
             } else if (gestureState.dx >= oneColumn)  {
               // console.log('gestureState.moveX: ', gestureState.moveX)
               console.log('MOVING RIGHT')
-              dispatchMotion(reconcile(props.id, 1, position, gridState))
+              dispatchMotion(reconcile(props.id, 1, props.position+offset.current.numberOfColumns, gridState))
             }              
         	}
         }
@@ -231,7 +234,7 @@ export default function RenderDraggable(props) {
                 } 
               }    
             ).start();
-          } else if ((gestureState.dx > (oneColumn-CIRCLE_RADIUS)) && southBoundCond) {
+          } else if ((gestureState.dx > (oneColumn-(CIRCLE_RADIUS/2))) && southBoundCond) {
             console.log('((gestureState.dx > (oneColumn-CIRCLE_RADIUS)) && southBoundCond)')
             offset.current.numberOfColumns += 1
             Animated.spring(

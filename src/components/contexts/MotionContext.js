@@ -10,11 +10,16 @@ export const reconcile = (id, delta, position, gridState) => ({
 	}
 });
 
+export const killMotion = () => ({
+	type: "KILL",
+});
+
 export const MotionContext = React.createContext({});
 
 export const motionReducer = (state, action) => {
 	switch (action.type) {
 		case "RCNCL":
+			//debugger
 			//console.log("RCNCL")
 			var grid = action.payload.gridState.grid;
 			var d = action.payload.delta;
@@ -30,9 +35,10 @@ export const motionReducer = (state, action) => {
 					(x['id'] !== id)
 				)
 			)
-			//console.log('toMove at reconcile: ', toMove)
 
-			//console.log('action.payload at reconcile: ', action.payload)			//debugger
+			console.log('toMove at reconcile: ', toMove)
+			console.log('action.payload at reconcile: ', action.payload)			//debugger
+			
 			var motionArray = [
 				{
 					'id': action.payload.id,
@@ -45,10 +51,16 @@ export const motionReducer = (state, action) => {
 					'new': toMove && toMove['pos']-d
 				}
 			]
+
 			return {
 				movingList: motionArray
+			}
+		case "KILL":
+			return {
+				movingList: []
 			}
 		default:
 			return state
 	}
+
 }
