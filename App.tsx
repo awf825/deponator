@@ -10,69 +10,44 @@ import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-cont
 import GridView from 'react-native-draggable-gridview'
 import axios from 'axios'
 
-interface Data {
-  id: string,
-  name: string,
-  calories: string,
-  description: string
-}
-
-interface ContainerProps {
-  newFoods: []
-}
-
-/**
- * App
- */
 export default function App() {
+    return (
+    <SafeAreaProvider>
+        <Container/>
+    </SafeAreaProvider>
+  )
+}
+
+const Container = memo(() => {
+  interface Data {
+    id: string,
+    name: string,
+    calories: string,
+    description: string,
+    color: string
+  }
   
-  ///const foods = useRef([])
-  const [foods, setFoods] = useState([])
+  const newData = (i: number, v?: any): Data => ({
+    id: uuid(),
+    name: v.name,
+    calories: v.calories,
+    description: v.description,
+    color: 'red'
+  })
+  const { top, bottom } = useSafeAreaInsets()
+  const [editing, setEditing] = useState(false)
+  const [data, setData] = useState<Data[]>([])
+
   useEffect(() => {
     axios.get("http://localhost:3001/foods/get-all-foods")
     .then(res => {
-      // foods.current = res.data.foods
-      setFoods(res.data.foods)
+      console.log(res.data.foods)
+      setData(res.data.foods.map((v : string | number, i : number) => newData(i, v)))
     })
     .catch(err => {
       console.log(err)
     })
   }, [])
-
-  return (
-    <SafeAreaProvider>
-      {
-        foods && <Container newFoods={foods}/>
-      }
-    </SafeAreaProvider>
-  )
-}
-
-/**
- * Container
- */
-const Container = memo(({ newFoods }: ContainerProps) => {
-  //debugger
-  interface Data {
-    id: string,
-    name: string,
-    calories: string,
-    description: string
-  }
-  
-  const newData = (i: number): Data => ({
-    id: uuid(),
-    name: newFoods[i].name,
-    calories: newFoods[i].calories,
-    description: newFoods[i].description
-    // id: uuid(),
-    // color: colors[i % colors.length],
-  })
-  const { top, bottom } = useSafeAreaInsets()
-  const [editing, setEditing] = useState(false)
-  const [data, setData] = useState<Data[]>(
-    Array.from(newFoods).map((v, i) => newData(i))
-  )
 
   const onPressEdit = useCallback(() => {
     setEditing(!editing)
@@ -98,7 +73,7 @@ const Container = memo(({ newFoods }: ContainerProps) => {
 
   /* onPressCell can only be called when not in editing mode */
 
-  const onPressCell = useCallback((item) => !editing && alert(item.color), [
+  const onPressCell = useCallback((item) => !editing && alert(item.name), [
     editing,
   ])
 
@@ -143,31 +118,6 @@ const Container = memo(({ newFoods }: ContainerProps) => {
 /**
  * Data
  */
-//const colors = ['red', 'orange', 'green', 'cyan', 'blue', 'purple', 'pink']
-// let foods;
-// const foods = axios.get("http://localhost:3001/foods/get-all-foods")
-// .then(res => {
-//   return res.data.foods
-// })
-// .catch(err => {
-//   console.log(err)
-// })
-
-// interface Data {
-//   id: string,
-//   name: string,
-//   calories: string,
-//   description: string
-// }
-
-// const newData = (i: number): Data => ({
-//   id: uuid(),
-//   name: foods[i].name,
-//   calories: foods[i].calories,
-//   description: foods[i].description
-//   // id: uuid(),
-//   // color: colors[i % colors.length],
-// })
 
 /**
  * Item
@@ -181,7 +131,9 @@ interface ItemProps {
 const Item = memo(({ item, editing, onPressDelete }: ItemProps) => {
   return (
     <View style={[styles.item, { backgroundColor: item.color || 'gray' }]}>
-      <Text style={{ color: '#fff', fontSize: 18 }}>{item.color}</Text>
+      <Text style={{ color: '#fff', fontSize: 18 }}>{item.name}</Text>
+      <Text style={{ color: '#fff', fontSize: 18 }}>{item.calories}</Text>
+      <Text style={{ color: '#fff', fontSize: 18 }}>{item.description}</Text>
       {editing && <DeleteButton onPress={() => onPressDelete(item)} />}
     </View>
   )
