@@ -3,6 +3,8 @@ import React, {
   useState, 
   useCallback,
   useEffect,
+  useReducer,
+  useContext,
   useRef
 } from 'react'
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
@@ -10,15 +12,25 @@ import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-cont
 import GridView from 'react-native-draggable-gridview'
 import axios from 'axios'
 
+import {
+  DataContext,
+  dataReducer,
+  setNewData
+} from "./src/contexts/DataContext";
+
 export default function App() {
+    const [state, dispatch] = useReducer(dataReducer, []);
     return (
     <SafeAreaProvider>
-        <Container/>
+        <DataContext.Provider value={[state, dispatch]}>
+            <Container/>
+        </DataContext.Provider>
     </SafeAreaProvider>
   )
 }
 
 const Container = memo(() => {
+  const [dataState, dispatch] = useContext(DataContext);
   interface Data {
     id: string,
     name: string,
@@ -41,8 +53,9 @@ const Container = memo(() => {
   useEffect(() => {
     axios.get("http://localhost:3001/foods/get-all-foods")
     .then(res => {
-      console.log(res.data.foods)
-      setData(res.data.foods.map((v : string | number, i : number) => newData(i, v)))
+      // // console.log(res.data.foods)
+      // setData(res.data.foods.map((v : string | number, i : number) => newData(i, v)))
+      dispatch(setNewData(res.data.foods.map((v : string | number, i : number) => newData(i, v))));
     })
     .catch(err => {
       console.log(err)
@@ -62,6 +75,7 @@ const Container = memo(() => {
 
   const renderItem = useCallback(
     (item) => (
+      console.log('item @ renderItem: ', item),
       <Item item={item} editing={editing} onPressDelete={onPressDelete} />
     ),
     [editing, data]
@@ -73,9 +87,17 @@ const Container = memo(() => {
 
   /* onPressCell can only be called when not in editing mode */
 
-  const onPressCell = useCallback((item) => !editing && alert(item.name), [
-    editing,
-  ])
+  const onPressCell = useCallback((item) => 
+    !editing && 
+    axios.get(`http://localhost:3001/places/get-places-by-food/${item._id}`)
+    .then(res => {
+      dispatch(setNewData(res.data.places.map((v : string | number, i : number) => newData(i, v))));
+    })
+    .catch(err => {
+      console.log(err)
+    }), 
+    [editing, data]
+  )
 
   const onPressAdd = useCallback(
     () => !editing && setData([newData(data.length + 1), ...data]),
@@ -95,31 +117,7 @@ const Container = memo(() => {
     [data]
   )
 
-  return (
-    <View style={{ flex: 1 }}>
-      <GridView
-        data={['+', ...data]}
-        keyExtractor={(item) => (item == '+' ? item : item.id)}
-        renderItem={renderItem}
-        renderLockedItem={renderLockedItem}
-        locked={locked}
-        onBeginDragging={onBeginDragging}
-        onPressCell={onPressCell}
-        onReleaseCell={onReleaseCell}
-        numColumns={3}
-        delayLongPress={editing ? 50 : 500}
-        containerMargin={{ top: 60 + top, bottom, left: 2, right: 2 }}
-      />
-      <Header top={top} editing={editing} onPress={onPressEdit} />
-    </View>
-  )
-})
-
-/**
- * Data
- */
-
-/**
+  /**
  * Item
  */
 interface ItemProps {
@@ -186,6 +184,26 @@ const Header = memo(({ top, editing, onPress }: HeaderProps) => (
     </View>
   </View>
 ))
+
+  return (
+    <View style={{ flex: 1 }}>
+      <GridView
+        data={dataState.data ? ['+', ...dataState.data] : []}
+        keyExtractor={(item) => (item == '+' ? item : item.id)}
+        renderItem={renderItem}
+        renderLockedItem={renderLockedItem}
+        locked={locked}
+        onBeginDragging={onBeginDragging}
+        onPressCell={onPressCell}
+        onReleaseCell={onReleaseCell}
+        numColumns={3}
+        delayLongPress={editing ? 50 : 500}
+        containerMargin={{ top: 60 + top, bottom, left: 2, right: 2 }}
+      />
+      <Header top={top} editing={editing} onPress={onPressEdit} />
+    </View>
+  )
+})
 
 /**
  * UUID
